@@ -1,0 +1,21 @@
+---
+domain: http://taye.me
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    {% for Post in site.posts %}
+    <url>
+        <loc>{{ page.domain }}{{ site.baseurl }}{{ Post.url | remove: 'index.html' }}</loc>
+    </url>
+    {% endfor %}
+
+    {% for Page in site.pages %}
+    {% if Page.layout != nil %}
+    {% if Page.layout != 'feed' %}
+    <url>
+        <loc>{{ page.domain }}{{ site.baseurl }}{{ Page.url | remove: 'index.html' }}</loc>
+    </url>
+    {% endif %}
+    {% endif %}
+    {% endfor %}
+</urlset>

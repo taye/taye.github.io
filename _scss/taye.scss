@@ -1,0 +1,40 @@
+// I'm doing things
+
+#footer-me {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    margin-left: -70px;
+}
+
+#cc-license {
+    float: right;
+    height: 40px;
+
+    img {
+        width: 35px;
+        height: 35px;
+
+        margin: 10px 0px 2px 5px;
+
+        vertical-align: middle;
+    }
+}
+
+.snap-example {
+    margin-bottom: 20px;
+
+    .canvas-group {
+        position: relative;
+        background-color: rgba(34, 153, 238, 0.2);
+    }
+
+    .overlay-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        cursor: -moz-grab;
+        cursor: -webkit-grab;
+    }
+}
