@@ -51,4 +51,22 @@ paths: [function (x, y) {
 </div>
 </div>
 
+<div class="snap-example">
+<div class="canvas-group">
+<canvas id="square-path" > </canvas>
+<canvas id="square-drag" class="overlay-canvas"> </canvas>
+</div>
+<div class="snippet">
+
+{% highlight javascript %}
+paths: [function (x, y) {
+    return {
+        y: x % 100 < 50? 50: 100,
+        range: Infinity
+    };
+}]
+{% endhighlight %}
+
+</div>
+</div>
 [ijs-gh]: https://github.com/taye/interact.js

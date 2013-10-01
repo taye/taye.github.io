@@ -132,6 +132,7 @@ window.demo = (function () {
                 };
             }
         });
+
         demo.line = new SnapDemo({
             pathCanvas: '#line-path',
             dragCanvas: '#line-drag',
@@ -142,11 +143,26 @@ window.demo = (function () {
             }
         });
 
+        demo.square = new SnapDemo({
+            pathCanvas: '#square-path',
+            dragCanvas: '#square-drag',
+            width: siteWidth,
+            drawInterval: 2,
+            path: function (x, y) {
+                return {
+                    y: x % 100 < 50? 50: 100,
+                    range: Infinity
+                };
+            }
+        });
+
         interact(window).on('resize', _.debounce(function (event) {
             demo.sin.resetOrigin();
             demo.sin.drawPath();
             demo.line.resetOrigin();
             demo.line.drawPath();
+            demo.square.resetOrigin();
+            demo.square.drawPath();
         }), 500);
 
     });
