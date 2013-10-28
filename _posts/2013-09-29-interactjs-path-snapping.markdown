@@ -5,12 +5,10 @@ date        : 2013-09-29 15:36:26
 categories  : [interact-js, snap]
 tags        : [interact.js, snap, custom snap, functional, drag-and-drop, drag and drop, draggable, droppable]
 excerpt     : path snapping now lets you set fixed axis origin points or use functions to return the points that the pointer should snap to.
+scripts     : [interact, underscore, ijs-demo]
 published   : true
 
 ---
-<script src="{{ site.baseurl }}/js/interact.js"></script>
-<script src="{{ site.baseurl }}/js/underscore.js"></script>
-<script src="{{ site.baseurl }}/js/ijs-demo.js"></script>
 <style type="text/css" src="{{ site.baseurl }}/css/taye.css"></style>
 
 [interact.js][ijs-gh] just got even snappier. `path` snapping now lets you set fixed axis origin points or use functions to return the points that the pointer should snap to.
