@@ -28,6 +28,9 @@ google_plus : "107750313581859477605"
         <link rel="stylesheet" href="{{ site.baseurl }}/css/main.css">
         <link rel="stylesheet" href="{{ site.baseurl }}/css/taye.css">
 
+{% for script in page.scripts %}
+        <script src="{{ site.baseurl }}/js/{{ script }}.js"></script>{% endfor %}
+
     </head>
     <body>
 
