@@ -97,9 +97,10 @@ var document      = window.document,
             elementTypes: /^container$/,
             numberTypes : /^range$|^interval$|^distance$/
         },
-        autoScrollEnabled: true,
+        autoScrollEnabled: false,
 
         origin      : { x: 0, y: 0 },
+        deltaSource : 'page'
     },
 
     snapStatus = {
@@ -289,6 +290,14 @@ var document      = window.document,
     },
     docTarget = {
         _element: document,
+        events  : {}
+    },
+    parentWindowTarget = {
+        _element: window.parent,
+        events  : {}
+    },
+    parentDocTarget = {
+        _element: window.parent.document,
         events  : {}
     },
 
@@ -564,32 +573,38 @@ var document      = window.document,
     }
 
     function touchDistance (event) {
-        var dx = event.touches[0].pageX,
-            dy = event.touches[0].pageY;
+        var deltaSource = (target && target.options || defaultOptions).deltaSource,
+            sourceX = deltaSource + 'X',
+            sourceY = deltaSource + 'Y',
+            dx = event.touches[0][sourceX],
+            dy = event.touches[0][sourceX];
 
         if (event.type === 'touchend' && event.touches.length === 1) {
-            dx -= event.changedTouches[0].pageX;
-            dy -= event.changedTouches[0].pageY;
+            dx -= event.changedTouches[0][sourceX];
+            dy -= event.changedTouches[0][sourceX];
         }
         else {
-            dx -= event.touches[1].pageX;
-            dy -= event.touches[1].pageY;
+            dx -= event.touches[1][sourceX];
+            dy -= event.touches[1][sourceX];
         }
 
         return Math.sqrt(dx * dx + dy * dy);
     }
 
     function touchAngle (event) {
-        var dx = event.touches[0].pageX,
-            dy = event.touches[0].pageY;
+        var deltaSource = (target && target.options || defaultOptions).deltaSource,
+            sourceX = deltaSource + 'X',
+            sourceY = deltaSource + 'Y',
+            dx = event.touches[0][sourceX],
+            dy = event.touches[0][sourceX];
 
         if (event.type === 'touchend' && event.touches.length === 1) {
-            dx -= event.changedTouches[0].pageX;
-            dy -= event.changedTouches[0].pageY;
+            dx -= event.changedTouches[0][sourceX];
+            dy -= event.changedTouches[0][sourceX];
         }
         else {
-            dx -= event.touches[1].pageX;
-            dy -= event.touches[1].pageY;
+            dx -= event.touches[1][sourceX];
+            dy -= event.touches[1][sourceX];
         }
 
         return 180 * -Math.atan(dy / dx) / Math.PI;
@@ -747,6 +762,9 @@ var document      = window.document,
     function InteractEvent (event, action, phase, element, related) {
         var client,
             page,
+            deltaSource = (target && target.options || defaultOptions).deltaSource,
+            sourceX = deltaSource + 'X',
+            sourceY = deltaSource + 'Y',
             options = target? target.options: defaultOptions;
 
         element = element || target._element;
@@ -825,12 +843,24 @@ var document      = window.document,
 
         // start/end event dx, dy is difference between start and current points
         if (phase === 'start' || phase === 'end' || action === 'drop') {
-            this.dx = page.x - x0;
-            this.dy = page.y - y0;
+            if (deltaSource === 'client') {
+                this.dx = client.x - x0;
+                this.dy = client.y - y0;
+            }
+            else {
+                this.dx = page.x - x0;
+                this.dy = page.y - y0;
+            }
         }
         else {
-            this.dx = page.x - prevX;
-            this.dy = page.y - prevY;
+            if (deltaSource === 'client') {
+                this.dx = client.x - prevClientX;
+                this.dy = client.y - prevClientY;
+            }
+            else {
+                this.dx = page.x - prevX;
+                this.dy = page.y - prevY;
+            }
         }
 
         if (action === 'resize') {
@@ -2141,6 +2171,22 @@ var document      = window.document,
             return this.options.origin;
         },
 
+        deltaSource: function (newValue) {
+            if (newValue === 'page' || newValue === 'client') {
+                this.options.deltaSource = newValue;
+
+                return this;
+            }
+
+            if (newValue === null) {
+                delete this.options.deltaSource;
+
+                return this;
+            }
+
+            return this.options.deltaSource;
+        },
+
         /**
          * @function
          * @param {String} context eg. 'snap', 'autoScroll'
@@ -2787,6 +2833,22 @@ var document      = window.document,
         return dynamicDrop;
     };
 
+    /**
+     * Returns or sets weather pageX or clientX is used to calculate dx/dy
+     *
+     * @function
+     * @param {string} newValue 'page' or 'client'
+     * @returns {string | Interactable}
+     */
+    interact.deltaSource = function (newValue) {
+        if (newValue === 'page' || newValue === 'client') {
+            defaultOptions.deltaSource = newValue;
+
+            return this;
+        }
+        return defaultOptions.deltaSource;
+    };
+
 
     events.add(docTarget   , 'mousedown'    , selectorDown);
     events.add(docTarget   , 'touchstart'   , selectorDown);
@@ -2798,6 +2860,18 @@ var document      = window.document,
     events.add(docTarget   , 'touchend'     , docPointerUp);
     events.add(docTarget   , 'touchcancel'  , docPointerUp);
     events.add(windowTarget, 'blur'         , docPointerUp);
+
+    if (window.parent !== window) {
+        try {
+            events.add(parentDocTarget   , 'mouseup'      , docPointerUp);
+            events.add(parentDocTarget   , 'touchend'     , docPointerUp);
+            events.add(parentDocTarget   , 'touchcancel'  , docPointerUp);
+            events.add(parentWindowTarget, 'blur'         , docPointerUp);
+        }
+        catch (error) {
+            interact.windowParentError = error;
+        }
+    }
 
     // For IE's lack of Event#preventDefault
     events.add(docTarget,    'selectstart', function (e) {
