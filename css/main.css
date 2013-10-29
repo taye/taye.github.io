@@ -10,8 +10,6 @@
   padding: 0;
 }
 
-html, body { height: 100%; }
-
 body {
   background-color: #FFF;
   font: 13.34px Helvetica, Arial, sans-serif;
@@ -57,7 +55,7 @@ ul.posts span {
   font-size: 115%;
   text-align: justify;
   width: 42em;
-  margin: 3em auto 2em;
+  margin: 3em auto 0;
   line-height: 1.5em;
 }
 
