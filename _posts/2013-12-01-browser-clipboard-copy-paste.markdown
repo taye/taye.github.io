@@ -15,7 +15,7 @@ published   : true
     z-index : 9003;
     width   : 100px;
     height  : 100px;
-    margin  : -50px;  /* so it's positioned at it's centre */
+    margin  : -50px;  /* so it's positioned at its centre */
     opacity : 0.6;
     border  : none;
     padding : 0;
@@ -44,7 +44,7 @@ the time the user input sequence is complete, it will be targeting the element
 and content you choose.
 
 ## Handling keyboard shortcuts (Ctrl+C / Ctrl+V)
-1. Add an event listener to the document for `keydown` events
+1. Add an event listener for `keydown` events
 
     ```javascript
     document.addEventListener('keydown', function (event) {
@@ -108,7 +108,7 @@ If this element is invisible then it does not interrupt the user's workflow.
         right   : -1000px;
     }
     ```
-2. Add a `mousedown` event listener to the `document` that checks for right-clicks
+2. Add a `mousedown` event listener that checks for right-clicks
 
     ```javascript
     document.addEventListener('mousedown' function (event) {
@@ -148,11 +148,11 @@ After mouseup, the context menu will be displayed for the `#rc-target` element.
 If the user clicks cut/copy/paste, it will relate to the text within the
 element.
 
-This way, you can have the user copy and paste data from anywhere in your web
-page/app.
+This way, you can have the user copy and paste whatever data you choose from
+anywhere in your web page/app.
 
 <div id="demo-space">
-    Try right-clicking here to see how this works
+    Try right-clicking here to see this working
 </div>
 <input id="rc-target" type="text">
 
@@ -168,7 +168,7 @@ demoSpace.onmousedown = function (event) {
     // if it's a right-click
     if (event.button === 2) {
         // change the value of the input element
-        rcTarget.value = ['Apples', 'Mele', 'Pommes', 'úlla'][(index++) % 4];
+        rcTarget.value = ['Apples', 'Mele', 'Pommes', 'Úlla'][(index++) % 4];
         // focus and position the input element to be below the cursor
         rcTarget.style.left = event.pageX + 'px';
         rcTarget.style.top  = event.pageY + 'px';
