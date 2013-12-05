@@ -92,6 +92,7 @@ plot( x )
 endgraph
 
 <div class="snap-example">
+    <h3> Logarithmic resistance with interact.js path snapping </h3>
 <div class="canvas-group">
 <canvas id="elastic-path"> </canvas>
 <canvas id="elastic-drag" class="overlay-canvas"> </canvas>
@@ -100,7 +101,7 @@ endgraph
 
 {% highlight javascript %}
 paths: [function (x, y) {
-    var scale = 200;
+    var scale = 50;
 
     return {
         x: scale * Math.log(x + scale) - scale * Math.log(scale),
@@ -123,7 +124,7 @@ interact(document).on('DOMContentLoaded', setTimeout(function () {
         dragCanvas: '#elastic-drag',
         width: siteWidth,
         path: function (x, y) {
-            var scale = 200;
+            var scale = 50;
 
             return {
                 x: scale * Math.log(x + scale) - scale * Math.log(scale),
