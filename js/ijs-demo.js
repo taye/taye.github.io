@@ -9,7 +9,10 @@ window.demo = (function () {
             SnapDemo: SnapDemo
         },
         blue = '#2299ee',
-        tango = '#ff4400';
+        tango = '#ff4400',
+        doneDemos = [];
+
+    window.demos = window.demos || [];
 
     function $ (root, selector) {
         if (!selector) {
@@ -50,7 +53,7 @@ window.demo = (function () {
 
         this.path = options.path;
         this.drawInterval = options.drawInterval || 4;
-        this.drawPath(options.drawInterval);
+        this.drawPath(this.drawInterval);
 
         this.resetOrigin();
 
@@ -81,25 +84,31 @@ window.demo = (function () {
             interval = interval && interval > 0? interval|0: this.drawInterval;
 
             var x = 0,
+                path,
                 context = this.pathContext,
                 width = this.pathCanvas.width,
                 len = width / interval;
 
             context.beginPath();
+
             if (typeof this.path === 'function') {
-                context.moveTo(x, this.path(x, 0).y);
+                target = this.path(x, 0);
             }
             else {
-                context.moveTo(x, this.path.y);
+                target = this.path;
             }
+            context.moveTo(typeof target.x === 'number'? target.x: x,
+                           typeof target.y === 'number'? target.y: 0);
 
             for (x = interval; x < width; x += interval) {
                 if (typeof this.path === 'function') {
-                    context.lineTo(x, this.path(x, 0).y);
+                    target = this.path(x, 0);
                 }
                 else {
-                    context.lineTo(x, this.path.y);
+                    target = this.path;
                 }
+                context.lineTo(typeof target.x === 'number'? target.x: x,
+                               typeof target.y === 'number'? target.y: 0);
             }
 
             context.stroke();
@@ -118,54 +127,19 @@ window.demo = (function () {
         }
     };
 
-    interact(document).on('DOMContentLoaded', function (event) {
-        var siteWidth = parseInt(window.getComputedStyle($('div.site')).width, 10);
-
-        demo.sin = new SnapDemo({
-            pathCanvas: '#sin-path',
-            dragCanvas: '#sin-drag',
-            width: siteWidth,
-            path: function (x, y) {
-                return {
-                    y: (75 + 50 * Math.sin(x * 0.04)),
-                    range: Infinity
-                };
-            }
+    interact(window).on('resize', _.debounce(function (event) {
+        doneDemos.forEach(function (thisDemo) {
+            thisDemo.resetOrigin();
+            thisDemo.drawPath();
         });
+    }, 500));
 
-        demo.line = new SnapDemo({
-            pathCanvas: '#line-path',
-            dragCanvas: '#line-drag',
-            width: siteWidth,
-            path: {
-                y: 75,
-                range: Infinity
-            }
+    interact(document).on('DOMContentLoaded', function () {
+        window.demos.forEach(function (parameters) {
+            doneDemos.push(new SnapDemo(parameters));
         });
-
-        demo.square = new SnapDemo({
-            pathCanvas: '#square-path',
-            dragCanvas: '#square-drag',
-            width: siteWidth,
-            drawInterval: 2,
-            path: function (x, y) {
-                return {
-                    y: x % 100 < 50? 50: 100,
-                    range: Infinity
-                };
-            }
-        });
-
-        interact(window).on('resize', _.debounce(function (event) {
-            demo.sin.resetOrigin();
-            demo.sin.drawPath();
-            demo.line.resetOrigin();
-            demo.line.drawPath();
-            demo.square.resetOrigin();
-            demo.square.drawPath();
-        }), 500);
-
     });
+
 
     return demo;
 }());

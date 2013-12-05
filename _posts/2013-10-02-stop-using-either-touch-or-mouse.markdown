@@ -2,7 +2,7 @@
 layout      : post
 title       : Hey web-devs, stop listening for EITHER touch or mouse events!
 date        : 2013-10-02 18:56:10
-categories  : [web-dev]
+categories  : [user-interaction]
 tags        : [rant, touchscreen, touch, mouse, javascript, HTML5, events]
 excerpt     : "Seriously. It's annoying. Some devices have a touchscreen and mouse/trackpad."
 published   : true

@@ -11,7 +11,7 @@ published   : true
 ---
 <style type="text/css" src="{{ site.baseurl }}/css/taye.css"></style>
 
-[interact.js][ijs-gh] just got even snappier. `path` snapping now lets you set fixed axis origin points or use functions to return the points that the pointer should snap to.
+<a href="https://github.com/taye/interact.js">interact.js</a> just got even snappier. `path` snapping now lets you set fixed axis origin points or use functions to return the points that the pointer should snap to.
 
 <div class="snap-example">
 <div class="canvas-group">
@@ -67,4 +67,44 @@ paths: [function (x, y) {
 
 </div>
 </div>
-[ijs-gh]: https://github.com/taye/interact.js
+
+<script>
+    var siteWidth = parseInt(window.getComputedStyle(document.querySelector('div.site')).width, 10);
+
+    window.demos = window.demos || [];
+
+    window.demos.push({
+        pathCanvas: '#sin-path',
+        dragCanvas: '#sin-drag',
+        width: siteWidth,
+        path: function (x, y) {
+            return {
+                y: (75 + 50 * Math.sin(x * 0.04)),
+                range: Infinity
+            };
+        }
+    });
+
+    window.demos.push({
+        pathCanvas: '#line-path',
+        dragCanvas: '#line-drag',
+        width: siteWidth,
+        path: {
+            y: 75,
+            range: Infinity
+        }
+    });
+
+    window.demos.push({
+        pathCanvas: '#square-path',
+        dragCanvas: '#square-drag',
+        width: siteWidth,
+        drawInterval: 2,
+        path: function (x, y) {
+            return {
+                y: x % 100 < 50? 50: 100,
+                range: Infinity
+            };
+        }
+    });
+</script>

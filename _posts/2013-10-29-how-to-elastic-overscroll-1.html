@@ -4,7 +4,7 @@ title       : Implementing elastic overscroll in JavaScript [Part 1]
 date        : 2013-10-28 02:10:30
 categories  : [interact-js]
 tags        : [interact.js, rubberband, elastic, math, logarithms, exponents]
-scripts     : [asciimathml]
+scripts     : [asciimathml, underscore, interact, ijs-demo]
 styles      : [math]
 excerpt     : ""
 published   : true
@@ -90,3 +90,47 @@ a = 4;
 plot( a * ln(x + a) - a * ln(a));
 plot( x )
 endgraph
+
+<div class="snap-example">
+<div class="canvas-group">
+<canvas id="elastic-path"> </canvas>
+<canvas id="elastic-drag" class="overlay-canvas"> </canvas>
+</div>
+<div class="snippet">
+
+{% highlight javascript %}
+paths: [function (x, y) {
+    var scale = 200;
+
+    return {
+        x: scale * Math.log(x + scale) - scale * Math.log(scale),
+        y: 75,
+        range: Infinity
+    };
+}]
+{% endhighlight %}
+
+</div>
+</div>
+
+<script>
+interact(document).on('DOMContentLoaded', setTimeout(function () {
+    var siteWidth = parseInt(window.getComputedStyle(document.querySelector('div.site')).width, 10);
+    window.demos = window.demos || [];
+
+    new demo.SnapDemo({
+        pathCanvas: '#elastic-path',
+        dragCanvas: '#elastic-drag',
+        width: siteWidth,
+        path: function (x, y) {
+            var scale = 200;
+
+            return {
+                x: scale * Math.log(x + scale) - scale * Math.log(scale),
+                y: 75,
+                range: Infinity
+            };
+        }
+    });
+    }, 1000));
+</script>
