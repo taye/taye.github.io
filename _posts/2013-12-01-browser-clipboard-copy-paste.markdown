@@ -4,8 +4,8 @@ title       : "How to control what is copy-pasted to/from the clipboard in Chrom
 date        : 2013-12-02 01:09:57
 categories  : [user-interaction]
 tags        : [clipboard, override, copy, paste, javascript]
-excerpt     : 
-scripts     : [underscore]
+excerpt     : "control what the browser copies and pastes when a user uses keyboard
+                shortcuts or the right-click context menu by changing focus to an element of your choice"
 published   : true
 
 ---
