@@ -8,7 +8,6 @@ google_plus : "107750313581859477605"
 <html>
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <title>{{ page.title }}</title>
         <meta name="author" content="{{ page.author }}" />
         <meta name="keywords" content="{{ page.tags | join:' ' }}" />
@@ -18,7 +17,6 @@ google_plus : "107750313581859477605"
         <meta name="description" content="{{ page.excerpt }}" />
     {% endif %}
         <meta name="viewport" content="width=device-width">
-        <meta http-equiv="X-UA-Compatible" content="IE=Edge">
 
         <link rel="alternate" type="application/rss+xml" href="{{ site.baseurl }}/rss.xml"/>
 
@@ -47,7 +45,7 @@ google_plus : "107750313581859477605"
           {{ content }}
 
           <div class="footer">
-            <img id="footer-me" src="{{ site.baseurl }}/img/hm-64.png">
+            <img id="footer-me" src="{{ site.baseurl }}/img/hm-64.png" alt="A self portrait">
             <div class="contact">
               <p>
                 Taye - Programmer · Visionary · Delicious
@@ -61,7 +59,7 @@ google_plus : "107750313581859477605"
               </p>
             </div>
             <a id="cc-license" title="Creative Commons Attribution-ShareAlike" rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" target="_blank">
-                <img src="{{ site.baseurl }}/img/cc_cc.png"><img src="{{ site.baseurl }}/img/cc_by.png"><img src="{{ site.baseurl }}/img/cc_sa.png">
+                <img src="{{ site.baseurl }}/img/cc_cc.png" alt="cc"><img src="{{ site.baseurl }}/img/cc_by.png" alt="CC Attribution"><img src="{{ site.baseurl }}/img/cc_sa.png" alt="CC ShareAlike">
             </a>
           </div>
         </div>
