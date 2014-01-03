@@ -24,3 +24,10 @@
     left: 0;
     cursor: -moz-grab;
     cursor: -webkit-grab; }
+
+.post-excerpt * {
+  margin-left: 100px;
+  margin-top: 0px; }
+.post-excerpt, .post-excerpt:visited, .post-excerpt:hover, .post-excerpt:active, .post-excerpt:focus {
+  color: black;
+  text-decoration: none; }

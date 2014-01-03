@@ -38,3 +38,15 @@
         cursor: -webkit-grab;
     }
 }
+
+.post-excerpt {
+    * {
+        margin-left: 100px;
+        margin-top: 0px;
+    }
+
+    &, &:visited, &:hover, &:active, &:focus {
+        color: black;
+        text-decoration: none;
+    }
+}
