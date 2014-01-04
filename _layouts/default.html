@@ -29,10 +29,10 @@ google_plus : "107750313581859477605"
         <link rel="stylesheet" href="{{ site.baseurl }}/css/taye.css">
         <link rel="icon" href="img/hm-64.png"/>
 
-{% for script in page.scripts %}
-        <script src="{{ site.baseurl }}/js/{{ script }}.js"></script>{% endfor %}
 {% for style in page.styles %}
         <link rel="stylesheet" href="{{ site.baseurl }}/css/{{ style }}.css"> {% endfor %}
+{% for script in page.scripts %}
+        <script src="{{ site.baseurl }}/js/{{ script }}.js"></script>{% endfor %}
 
     </head>
     <body>
