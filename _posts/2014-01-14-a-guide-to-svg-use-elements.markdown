@@ -1,11 +1,11 @@
 ---
 layout      : post
 date        : 2014-01-04 9:55:40
-title       : A guide to SVG &lt;use&gt; elements
+title       : A guide to SVG <use> elements
 permalink   : /svg/a-guide-to-svg-use-elements
-categories  : [SVG]
-tags        : [SVG, use, use element, xlink, 'xlink:href', namespaces, javascript, graphics]
-excerpt     : "SVG &lt;use&gt; elements allow you to duplicate and re-use graphical SVG elements including &lt;g&gt;, &lt;svg&gt; and &lt;symbol&gt; elements as well as other &lt;use&gt; elements. With them, you can craft SVG documents with a DRY kind of approach."
+categories  : [svg]
+tags        : [svg, use, use element, xlink, 'xlink:href', namespaces, javascript, graphics]
+excerpt     : "SVG <use> elements allow you to duplicate and re-use graphical SVG elements including <g>, <svg> and <symbol> elements as well as other <use> elements. With them, you can craft SVG documents with a DRY kind of approach."
 scripts     : [livedemo]
 published   : true
 
