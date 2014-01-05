@@ -1,8 +1,23 @@
+.post-title {
+  display: block;
+  overflow: hidden;
+  margin: 1em 0; }
+  .post-title h1 {
+    font-size: 1.2em;
+    color: #3e3e3e;
+    display: inline;
+    float: left;
+    margin: 0; }
+  .post-title p {
+    margin: 0; }
+
 #footer-me {
   display: block;
   position: fixed;
   bottom: 0;
-  margin-left: -70px; }
+  margin-left: -70px;
+  width: 64px;
+  height: 64px; }
 
 #cc-license {
   float: right;
@@ -22,8 +37,9 @@
     position: absolute;
     top: 0;
     left: 0;
+    cursor: -webkit-grab;
     cursor: -moz-grab;
-    cursor: -webkit-grab; }
+    cursor: grab; }
 
 .post-excerpt * {
   margin-left: 100px;
@@ -31,3 +47,15 @@
 .post-excerpt, .post-excerpt:visited, .post-excerpt:hover, .post-excerpt:active, .post-excerpt:focus {
   color: black;
   text-decoration: none; }
+
+pre {
+  margin: 0; }
+
+.twitter-share-button {
+  vertical-align: middle;
+  margin: 0 0 0 2em; }
+
+#feed-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle; }

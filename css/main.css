@@ -4,26 +4,16 @@
 /*
 /*****************************************************************************/
 
-/* Global Reset */
-* {
-  margin: 0;
-  padding: 0;
-}
-
 body {
   background-color: #FFF;
   font: 13.34px Helvetica, Arial, sans-serif;
   font-size: small;
   text-align: center;
+
+  margin: auto:
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-size: 100%; }
-
-h1 { margin-bottom: 1em; }
-p { margin: 1em 0; }
-
-a         { color: #00a; }
+a { color: #00a; }
 
 /*****************************************************************************/
 /*
@@ -55,8 +45,10 @@ ul.posts span {
   font-size: 115%;
   text-align: justify;
   width: 42em;
-  margin: 3em auto 0;
   line-height: 1.5em;
+
+  margin: auto;
+  padding: 0 1em;
 }
 
 .site .header a {
@@ -66,15 +58,24 @@ ul.posts span {
 
 .site .header h1.title {
   display: inline-block;
-  margin-bottom: 2em;
+  /*margin-bottom: 2em;*/
 }
 
 .site .header h1.title a {
-  color: #a00;
+  color: #29e;
+
+  padding: 0.2em;
+  margin-left: -0.2em;
+  display: inline-block;
+
+  transition: all 0.2s;
 }
 
-.site .header h1.title a:hover {
-  color: #000;
+.site .header h1.title a:hover,
+.site .header h1.title a:active,
+.site .header h1.title a:focus {
+  background-color: #29e;
+  color: #fff;
 }
 
 .site .header a.extra {
@@ -88,6 +89,7 @@ ul.posts span {
 
 .site .meta {
   color: #aaa;
+  float: right;
 }
 
 .site .footer {
