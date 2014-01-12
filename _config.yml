@@ -1,7 +1,7 @@
 name        : Here I am - Taye Adeyemi
 description : Taye Adeyemi - Programmer · Visionary · Delicious
-baseurl     : /blog
-url         : http://taye.me/blog
+baseurl     : /brog/_site
+url         : http://taye.me/brog/_site
 pygments    : true
 timezone    : Europe/Dublin
 

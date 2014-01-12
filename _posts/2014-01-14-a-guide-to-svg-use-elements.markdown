@@ -14,7 +14,7 @@ published   : true
 <style>
 svg {
     width: 100%;
-    height: 150px;
+    height: 25%;
     background-color: rgba(34, 153, 238, 0.2);
 }
 svg use {
