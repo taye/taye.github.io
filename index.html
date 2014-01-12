@@ -4,17 +4,20 @@ title: Here I am
 ---
 
 <div id="home">
-  <h1>Blog Posts</h1>
-  <ul class="posts">
+  <h2>Blog Posts</h2>
+  <table class="posts">
     {% for post in site.posts %}
     {% unless post.published == false %}
-    <li>
-        <span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title | xml_escape }}</a>
-        {% if post.excerpt %}
-        <a class="post-excerpt" href="{{ site.baseurl }}{{ post.url }}"><p>{{ post.excerpt | xml_escape}}</p></a>
-        {% endif %}
-    </li>
+    <tr>
+        <td><span class="post-date">{{ post.date | date_to_string }}</span></td>
+        <td>
+            <a class="title" href="{{ site.baseurl }}{{ post.url }}">{{ post.title | xml_escape }}</a>
+            {% if post.excerpt %}
+            <a class="post-excerpt" href="{{ site.baseurl }}{{ post.url }}"><p>{{ post.excerpt | xml_escape }}</p></a>
+            {% endif %}
+        </td>
+    </tr>
     {% endunless %}
     {% endfor %}
-  </ul>
+  </table>
 </div>
