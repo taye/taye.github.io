@@ -1,5 +1,5 @@
 /**
- * livedemo v0.0.0
+ * livedemo 0.0.1
  *
  * Copyright (c) 2014 Taye Adeyemi <dev@taye.me>
  * Open source under the MIT License.
@@ -91,9 +91,9 @@ document.addEventListener('DOMContentLoaded', this.liveDemo = function (event) {
             element.removeChild(element.childNodes[0]);
         }
 
-        // eval code
+        // Try to run code
         try {
-            eval(element.textContent);
+            new Function(element.textContent)();
         } catch (error) {
             console.error('livedemo failed to execute a javascript code block');
             console.log({ element: element, error: error });
