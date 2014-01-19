@@ -16,6 +16,17 @@ layout: default
 
 <hr>
 
+{% if site.related_posts.size > 0 %}
+<div id="related-posts">
+    <h3> You might also like </h3>
+    <ul>
+    {% for post in site.related_posts limit:3 %}
+        <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title | xml_escape }}</a></li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
 <script>
 var idcomments_acct = '5b4485e927a92a60756d6eb01be3d7f2';
 var idcomments_post_id;
