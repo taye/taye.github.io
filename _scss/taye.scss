@@ -1,7 +1,6 @@
 body {
   background-color: #FFF;
   font-family: "Merriweather", Helvetica, Arial, sans-serif;
-  font-size: 0.9em;
   margin: auto;
 }
 
@@ -11,16 +10,6 @@ a {
 
 h2 {
   color: #3e3e3e;
-}
-
-ul.posts {
-  list-style-type: none;
-  margin-bottom: 2em;
-  li {
-    line-height: 1.75em;
-  }
-  span {
-  }
 }
 
 header {
@@ -37,7 +26,7 @@ header {
     color: white;
 
     padding: 1.75em 0.1em 0em;
-    margin: 0 0 1em 1.5em;
+    margin: 0 0 1em 6%;
     display: inline-block;
   }
 
@@ -54,8 +43,9 @@ header {
 /* Site */
 
 .site {
-  font-size: 115%;
   width: 42em;
+  max-width: 95%;
+
   margin: auto;
   padding: 0 1em;
 
@@ -63,23 +53,29 @@ header {
     color: #aaa;
     float: right;
   }
-  .footer {
+
+  footer {
     font-size: 80%;
     color: #666;
     border-top: 4px solid #eee;
     margin-top: 2em;
     overflow: hidden;
+
     .contact {
-      float: left;
-      margin-right: 3em;
+      margin-right: 2%;
+      display: inline-block;
+      vertical-align: middle;
+
       a {
         color: #8085C1;
       }
     }
+
     .rss {
       margin-top: 1.1em;
       margin-right: -.2em;
       float: right;
+
       img {
         border: 0;
       }
@@ -106,7 +102,10 @@ header {
   pre {
     code {
       border: none;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
     }
+
     &.terminal {
       border: 1px solid #000;
       background-color: #333;
@@ -126,7 +125,6 @@ header {
     line-height: initial;
     color: #3e3e3e;
     display: inline;
-    float: left;
     margin: 0;
   }
   p {
@@ -135,10 +133,12 @@ header {
 }
 
 #footer-me {
-  display: block;
+  display: inline-block;
   position: fixed;
   bottom: 0;
   margin-left: -70px;
+  vertical-align: middle;
+
   width: 64px;
   height: 64px;
 }
@@ -146,6 +146,9 @@ header {
 #cc-license {
   float: right;
   height: 40px;
+  text-decoration: none;
+  display: inline-block;
+
   img {
     width: 35px;
     height: 35px;
@@ -190,7 +193,7 @@ table.posts {
     background-color: #E5F3FD;
     color: #29e;
 
-    transition: all 0.2s;
+    transition: background-color 0.2s, color 0.2s;
 
     &:hover {
       color: #f40;
@@ -202,12 +205,8 @@ table.posts {
     color: #333;
     text-decoration: none;
 
-    margin: 0 0 0 0.7em;
+    margin: 0 0 0.5em 0.7em;
     display: inline-block;
-
-    & > p {
-      margin: 0;
-    }
   }
 
   td {
@@ -235,6 +234,38 @@ pre {
   vertical-align: middle;
 }
 
+@media screen and (min-width: 1000pX) {
+  body {
+    font-size: 1.4em;
+  }
+}
+
+@media screen and (max-width: 720pX) {
+  .site {
+    width: 95%;
+    padding: 0 2.5%;
+  }
+
+  pre code {
+    font-size: 0.8em;
+  }
+
+  table.posts td:first-child {
+    font-size: 0.9em;
+    width: 6em;
+  }
+
+  #footer-me {
+    position: static;
+    margin-left: 0;
+  }
+}
+
+@media screen and (max-width: 320pX) {
+  table.posts td:first-child {
+    display: none;
+  }
+}
 
 @font-face {
   font-family: "Merriweather";

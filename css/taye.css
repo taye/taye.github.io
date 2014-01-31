@@ -1,7 +1,6 @@
 body {
   background-color: #FFF;
   font-family: "Merriweather", Helvetica, Arial, sans-serif;
-  font-size: 0.9em;
   margin: auto; }
 
 a {
@@ -9,12 +8,6 @@ a {
 
 h2 {
   color: #3e3e3e; }
-
-ul.posts {
-  list-style-type: none;
-  margin-bottom: 2em; }
-  ul.posts li {
-    line-height: 1.75em; }
 
 header {
   font-family: Helvetica, Arial, sans-serif; }
@@ -26,7 +19,7 @@ header {
     background-color: #29e;
     color: white;
     padding: 1.75em 0.1em 0em;
-    margin: 0 0 1em 1.5em;
+    margin: 0 0 1em 6%;
     display: inline-block; }
   header a.extra {
     color: #aaa;
@@ -36,29 +29,30 @@ header {
 
 /* Site */
 .site {
-  font-size: 115%;
   width: 42em;
+  max-width: 95%;
   margin: auto;
   padding: 0 1em; }
   .site .meta {
     color: #aaa;
     float: right; }
-  .site .footer {
+  .site footer {
     font-size: 80%;
     color: #666;
     border-top: 4px solid #eee;
     margin-top: 2em;
     overflow: hidden; }
-    .site .footer .contact {
-      float: left;
-      margin-right: 3em; }
-      .site .footer .contact a {
+    .site footer .contact {
+      margin-right: 2%;
+      display: inline-block;
+      vertical-align: middle; }
+      .site footer .contact a {
         color: #8085C1; }
-    .site .footer .rss {
+    .site footer .rss {
       margin-top: 1.1em;
       margin-right: -.2em;
       float: right; }
-      .site .footer .rss img {
+      .site footer .rss img {
         border: 0; }
 
 .post {
@@ -74,7 +68,9 @@ header {
     background-color: #eef;
     padding: 0 .2em; }
   .post pre code {
-    border: none; }
+    border: none;
+    word-wrap: break-word;
+    overflow-wrap: break-word; }
   .post pre.terminal {
     border: 1px solid #000;
     background-color: #333;
@@ -90,22 +86,24 @@ header {
     line-height: initial;
     color: #3e3e3e;
     display: inline;
-    float: left;
     margin: 0; }
   .post-title p {
     margin: 0; }
 
 #footer-me {
-  display: block;
+  display: inline-block;
   position: fixed;
   bottom: 0;
   margin-left: -70px;
+  vertical-align: middle;
   width: 64px;
   height: 64px; }
 
 #cc-license {
   float: right;
-  height: 40px; }
+  height: 40px;
+  text-decoration: none;
+  display: inline-block; }
   #cc-license img {
     width: 35px;
     height: 35px;
@@ -139,17 +137,15 @@ table.posts .title {
   text-decoration: none;
   background-color: #E5F3FD;
   color: #29e;
-  transition: all 0.2s; }
+  transition: background-color 0.2s, color 0.2s; }
   table.posts .title:hover {
     color: #f40;
     border-color: #f40; }
 table.posts .post-excerpt {
   color: #333;
   text-decoration: none;
-  margin: 0 0 0 0.7em;
+  margin: 0 0 0.5em 0.7em;
   display: inline-block; }
-  table.posts .post-excerpt > p {
-    margin: 0; }
 table.posts td {
   padding-bottom: 1.5em; }
   table.posts td:first-child {
@@ -168,6 +164,27 @@ pre {
   height: 20px;
   vertical-align: middle; }
 
+@media screen and (min-width: 1000pX) {
+  body {
+    font-size: 1.4em; } }
+@media screen and (max-width: 720pX) {
+  .site {
+    width: 95%;
+    padding: 0 2.5%; }
+
+  pre code {
+    font-size: 0.8em; }
+
+  table.posts td:first-child {
+    font-size: 0.9em;
+    width: 6em; }
+
+  #footer-me {
+    position: static;
+    margin-left: 0; } }
+@media screen and (max-width: 320pX) {
+  table.posts td:first-child {
+    display: none; } }
 @font-face {
   font-family: "Merriweather";
   font-style: normal;

@@ -13,7 +13,7 @@ title: Here I am
         <td>
             <a class="title" href="{{ site.baseurl }}{{ post.url }}">{{ post.title | xml_escape }}</a>
             {% if post.excerpt %}
-            <a class="post-excerpt" href="{{ site.baseurl }}{{ post.url }}"><p>{{ post.excerpt | xml_escape }}</p></a>
+            <p class="post-excerpt">{{ post.excerpt | xml_escape }}</p>
             {% endif %}
         </td>
     </tr>
