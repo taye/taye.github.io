@@ -2,7 +2,6 @@ body {
   background-color: #FFF;
   font-family: "Merriweather", Helvetica, Arial, sans-serif;
   font-size: 0.9em;
-  text-align: center;
   margin: auto;
 }
 
@@ -24,41 +23,42 @@ ul.posts {
   }
 }
 
+header {
+  font-family: Helvetica, Arial, sans-serif;
+
+  a {
+    font-weight: bold;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  h1 {
+    background-color: #29e;
+    color: white;
+
+    padding: 1.75em 0.1em 0em;
+    margin: 0 0 1em 1.5em;
+    display: inline-block;
+  }
+
+  a.extra {
+    color: #aaa;
+    margin-left: 1em;
+
+    &:hover {
+      color: #000;
+    }
+  }
+}
+
 /* Site */
 
 .site {
   font-size: 115%;
-  text-align: justify;
   width: 42em;
-  line-height: 1.5em;
   margin: auto;
   padding: 0 1em;
-  .header {
-    a {
-      font-weight: bold;
-      text-decoration: none;
-    }
-    h1.title {
-      a {
-        color: #29e;
-        padding: 0.2em;
-        margin-left: -0.2em;
-        display: inline-block;
-        transition: all 0.2s;
-        &:hover, &:active, &:focus {
-          background-color: #29e;
-          color: #fff;
-        }
-      }
-    }
-    a.extra {
-      color: #aaa;
-      margin-left: 1em;
-      &:hover {
-        color: #000;
-      }
-    }
-  }
+
   .meta {
     color: #aaa;
     float: right;
@@ -88,6 +88,8 @@ ul.posts {
 }
 
 .post {
+  line-height: 1.5em;
+
   pre {
     border: 1px solid #ddd;
     background-color: #eef;
@@ -121,7 +123,7 @@ ul.posts {
   overflow: hidden;
   margin: 1em 0;
   h1 {
-    font-size: 1.2em;
+    line-height: initial;
     color: #3e3e3e;
     display: inline;
     float: left;
@@ -179,26 +181,29 @@ table.posts {
 
   .title {
     font-size: 1.1em;
-    display: inline-block;
-    border-left: solid 0.2em #29e;
+    display: block;
+    border-left: solid 0.3em #29e;
     padding: 0.1em 0.4em;
+    margin-bottom: 0.5em;
+    text-decoration: none;
+
+    background-color: #E5F3FD;
+    color: #29e;
+
+    transition: all 0.2s;
+
+    &:hover {
+      color: #f40;
+      border-color: #f40;
+    }
   }
 
   .post-excerpt {
-    color: #444;
+    color: #333;
     text-decoration: none;
 
     margin: 0 0 0 0.7em;
     display: inline-block;
-
-    &:visited, &:active, &:focus {
-      color: #666;
-      text-decoration: none;
-    }
-
-    &:hover {
-      color: black;
-    }
 
     & > p {
       margin: 0;

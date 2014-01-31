@@ -2,7 +2,6 @@ body {
   background-color: #FFF;
   font-family: "Merriweather", Helvetica, Arial, sans-serif;
   font-size: 0.9em;
-  text-align: center;
   margin: auto; }
 
 a {
@@ -17,31 +16,30 @@ ul.posts {
   ul.posts li {
     line-height: 1.75em; }
 
+header {
+  font-family: Helvetica, Arial, sans-serif; }
+  header a {
+    font-weight: bold;
+    text-decoration: none;
+    color: inherit; }
+  header h1 {
+    background-color: #29e;
+    color: white;
+    padding: 1.75em 0.1em 0em;
+    margin: 0 0 1em 1.5em;
+    display: inline-block; }
+  header a.extra {
+    color: #aaa;
+    margin-left: 1em; }
+    header a.extra:hover {
+      color: #000; }
+
 /* Site */
 .site {
   font-size: 115%;
-  text-align: justify;
   width: 42em;
-  line-height: 1.5em;
   margin: auto;
   padding: 0 1em; }
-  .site .header a {
-    font-weight: bold;
-    text-decoration: none; }
-  .site .header h1.title a {
-    color: #29e;
-    padding: 0.2em;
-    margin-left: -0.2em;
-    display: inline-block;
-    transition: all 0.2s; }
-    .site .header h1.title a:hover, .site .header h1.title a:active, .site .header h1.title a:focus {
-      background-color: #29e;
-      color: #fff; }
-  .site .header a.extra {
-    color: #aaa;
-    margin-left: 1em; }
-    .site .header a.extra:hover {
-      color: #000; }
   .site .meta {
     color: #aaa;
     float: right; }
@@ -63,31 +61,33 @@ ul.posts {
       .site .footer .rss img {
         border: 0; }
 
-.post pre {
-  border: 1px solid #ddd;
-  background-color: #eef;
-  padding: 0 .4em; }
-.post ul, .post ol {
-  margin-left: 1.35em; }
-.post code {
-  border: 1px solid #ddd;
-  background-color: #eef;
-  padding: 0 .2em; }
-.post pre code {
-  border: none; }
-.post pre.terminal {
-  border: 1px solid #000;
-  background-color: #333;
-  color: #FFF; }
-  .post pre.terminal code {
-    background-color: #333; }
+.post {
+  line-height: 1.5em; }
+  .post pre {
+    border: 1px solid #ddd;
+    background-color: #eef;
+    padding: 0 .4em; }
+  .post ul, .post ol {
+    margin-left: 1.35em; }
+  .post code {
+    border: 1px solid #ddd;
+    background-color: #eef;
+    padding: 0 .2em; }
+  .post pre code {
+    border: none; }
+  .post pre.terminal {
+    border: 1px solid #000;
+    background-color: #333;
+    color: #FFF; }
+    .post pre.terminal code {
+      background-color: #333; }
 
 .post-title {
   display: block;
   overflow: hidden;
   margin: 1em 0; }
   .post-title h1 {
-    font-size: 1.2em;
+    line-height: initial;
     color: #3e3e3e;
     display: inline;
     float: left;
@@ -132,19 +132,22 @@ table.posts .post-date {
   font-size: 90%; }
 table.posts .title {
   font-size: 1.1em;
-  display: inline-block;
-  border-left: solid 0.2em #29e;
-  padding: 0.1em 0.4em; }
+  display: block;
+  border-left: solid 0.3em #29e;
+  padding: 0.1em 0.4em;
+  margin-bottom: 0.5em;
+  text-decoration: none;
+  background-color: #E5F3FD;
+  color: #29e;
+  transition: all 0.2s; }
+  table.posts .title:hover {
+    color: #f40;
+    border-color: #f40; }
 table.posts .post-excerpt {
-  color: #444;
+  color: #333;
   text-decoration: none;
   margin: 0 0 0 0.7em;
   display: inline-block; }
-  table.posts .post-excerpt:visited, table.posts .post-excerpt:active, table.posts .post-excerpt:focus {
-    color: #666;
-    text-decoration: none; }
-  table.posts .post-excerpt:hover {
-    color: black; }
   table.posts .post-excerpt > p {
     margin: 0; }
 table.posts td {
