@@ -1,6 +1,6 @@
 body {
   background-color: #FFF;
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: "Merriweather", Helvetica, Arial, sans-serif;
   font-size: 0.9em;
   text-align: center;
   margin: auto; }
@@ -164,3 +164,9 @@ pre {
   width: 20px;
   height: 20px;
   vertical-align: middle; }
+
+@font-face {
+  font-family: "Merriweather";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Merriweather"), url("https://themes.googleusercontent.com/static/fonts/merriweather/v6/RFda8w1V0eDZheqfcyQ4EHhCUOGz7vYGh680lGh-uXM.woff") format("woff"); }
