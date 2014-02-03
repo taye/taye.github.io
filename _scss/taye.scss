@@ -104,8 +104,6 @@ header {
   pre {
     code {
       border: none;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
 
       background-color: transparent;
     }
@@ -216,6 +214,8 @@ table.posts {
 
 pre {
   margin: 0;
+  white-space: pre;
+  overflow: auto;
 }
 
 .twitter-share-button {
