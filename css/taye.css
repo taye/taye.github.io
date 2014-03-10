@@ -131,9 +131,8 @@ table.posts .title {
   text-decoration: none;
   background-color: #E5F3FD;
   color: #29e;
-  transition: background-color 0.2s, color 0.2s; }
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
   table.posts .title:hover {
-    color: #f40;
     border-color: #f40; }
 table.posts .post-excerpt {
   color: #333;

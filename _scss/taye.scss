@@ -188,10 +188,10 @@ table.posts {
     background-color: #E5F3FD;
     color: #29e;
 
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 
     &:hover {
-      color: #f40;
+      //color: #f40;
       border-color: #f40;
     }
   }
