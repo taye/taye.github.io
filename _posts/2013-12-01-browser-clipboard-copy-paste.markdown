@@ -1,6 +1,7 @@
 ---
 layout      : post
 title       : "How to control what is copy-pasted to/from the clipboard in Chrome, Firefox and Safari"
+permalink   : /user-interaction/2013/12/02/browser-clipboard-copy-paste.html
 date        : 2013-12-02 01:09:57
 categories  : [user-interaction]
 tags        : [clipboard, override, copy, paste, javascript]

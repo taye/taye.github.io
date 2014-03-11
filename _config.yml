@@ -2,6 +2,7 @@ name        : Here I am
 description : Taye Adeyemi - Programmer · Visionary · Delicious
 baseurl     : /blog
 url         : http://taye.me/blog
+permalink   : pretty
 pygments    : true
 timezone    : Europe/Dublin
 

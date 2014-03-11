@@ -1,6 +1,7 @@
 ---
 layout      : post
 title       : Hey web-devs, stop listening for EITHER touch or mouse events!
+permalink   : /user-interaction/2013/10/02/stop-using-either-touch-or-mouse.html
 date        : 2013-10-02 18:56:10
 categories  : [user-interaction]
 tags        : [rant, touchscreen, touch, mouse, javascript, HTML5, events]
