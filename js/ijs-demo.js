@@ -31,8 +31,7 @@ window.demo = (function () {
     };
 
     function SnapDemo (options) {
-        var that = this,
-            rect;
+        var that = this;
 
         this.pathCanvas = $(options.pathCanvas);
 
@@ -55,8 +54,6 @@ window.demo = (function () {
         this.drawInterval = options.drawInterval || 4;
         this.drawPath(this.drawInterval);
 
-        this.resetOrigin();
-
         interact(this.dragCanvas)
             .styleCursor(false)
             .snap({
@@ -76,7 +73,8 @@ window.demo = (function () {
             })
             .on('dragmove', function (event) {
                 that.dragmove(event);
-            });
+            })
+            .origin('self');
     }
 
     SnapDemo.prototype = {
@@ -84,10 +82,9 @@ window.demo = (function () {
             interval = interval && interval > 0? interval|0: this.drawInterval;
 
             var x = 0,
-                path,
                 context = this.pathContext,
                 width = this.pathCanvas.width,
-                len = width / interval;
+                target;
 
             context.beginPath();
 
@@ -118,21 +115,8 @@ window.demo = (function () {
 
             context.clearRect(0,0, context.canvas.width, context.canvas.height);
             context.circle(event.pageX, event.pageY, 8).fill();
-        },
-        resetOrigin: function () {
-            var rect = interact(this.dragCanvas).getRect();
-
-            interact(this.dragCanvas)
-                .origin({ x: rect.left, y: rect.top });
         }
     };
-
-    interact(window).on('resize', _.debounce(function (event) {
-        doneDemos.forEach(function (thisDemo) {
-            thisDemo.resetOrigin();
-            thisDemo.drawPath();
-        });
-    }, 500));
 
     interact(document).on('DOMContentLoaded', function () {
         window.demos.forEach(function (parameters) {
