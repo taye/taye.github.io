@@ -1,5 +1,5 @@
 /**
- * interact.js v1.0.3
+ * interact.js v1.0.12
  *
  * Copyright (c) 2012, 2013, 2014 Taye Adeyemi <dev@taye.me>
  * Open source under the MIT License.
@@ -15,17 +15,81 @@
         SVGElementInstance = window.SVGElementInstance || blank,
         HTMLElement        = window.HTMLElement        || window.Element,
 
-        // Previous interact move event pointer position
-        prevX       = 0,
-        prevY       = 0,
-        prevClientX = 0,
-        prevClientY = 0,
+        PointerEvent = window.PointerEvent || window.MSPointerEvent,
+        GestureEvent = window.GestureEvent || window.MSGestureEvent,
+        Gesture      = window.Gesture      || window.MSGesture,
 
-        // Previous interact start event pointer position
-        x0       = 0,
-        y0       = 0,
-        clientX0 = 0,
-        clientY0 = 0,
+        hypot = Math.hypot || function (x, y) { return Math.sqrt(x * x + y * y); },
+
+        // Previous native pointer move event coordinates
+        prevCoords = {
+            pageX: 0,
+            pageY: 0,
+            clientX: 0,
+            clientY: 0,
+            timeStamp: 0
+        },
+        // current native pointer move event coordinates
+        curCoords = {
+            pageX: 0,
+            pageY: 0,
+            clientX: 0,
+            clientY: 0,
+            timeStamp: 0
+        },
+
+        // Starting InteractEvent pointer coordinates
+        startCoords = {
+            pageX: 0,
+            pageY: 0,
+            clientX: 0,
+            clientY: 0,
+            timeStamp: 0
+        },
+
+        // Change in coordinates and time of the pointer
+        pointerDelta = {
+            pageX: 0,
+            pageY: 0,
+            clientX: 0,
+            clientY: 0,
+            timeStamp: 0,
+            pageSpeed: 0,
+            clientSpeed: 0
+        },
+
+        // keep track of added PointerEvents if browser supports them
+        pointerIds   = PointerEvent? []: null,
+        pointerMoves = PointerEvent? []: null,
+
+        downTime  = 0,         // the timeStamp of the starting event
+        downEvent = null,      // gesturestart/mousedown/touchstart event
+        prevEvent = null,      // previous action event
+        tapTime   = 0,         // time of the most recent tap event
+        prevTap   = null,
+
+        tmpXY = {},     // reduce object creation in getXY()
+
+        inertiaStatus = {
+            active       : false,
+            target       : null,
+            targetElement: null,
+
+            startEvent: null,
+            pointerUp : {},
+
+            xe : 0,
+            ye : 0,
+            duration: 0,
+
+            t0 : 0,
+            vx0: 0,
+            vys: 0,
+
+            lambda_v0: 0,
+            one_ve_v0: 0,
+            i  : null
+        },
 
         gesture = {
             start: { x: 0, y: 0 },
@@ -47,46 +111,71 @@
         selectors       = {},   // all css selector interactables
         selectorDZs     = [],   // all dropzone selector interactables
         matches         = [],   // all selectors that are matched by target element
+        delegatedEvents = {},   // { type: { selector: [[listener, useCapture]} }
+        selectorGesture = null, // MSGesture object for selector PointerEvents
 
         target          = null, // current interactable being interacted with
         dropTarget      = null, // the dropzone a drag target might be dropped into
+        dropElement     = null, // the element at the time of checking
         prevDropTarget  = null, // the dropzone that was recently dragged away from
+        prevDropElement = null, // the element at the time of checking
 
         defaultOptions = {
             draggable   : false,
             dropzone    : false,
-            resizeable  : false,
+            accept      : null,
+            resizable  : false,
             squareResize: false,
-            gestureable : false,
+            gesturable : false,
 
             styleCursor : true,
 
             // aww snap
             snap: {
                 mode        : 'grid',
+                endOnly     : false,
+                actions     : ['drag'],
                 range       : Infinity,
                 grid        : { x: 100, y: 100 },
                 gridOffset  : { x:   0, y:   0 },
                 anchors     : [],
                 paths       : [],
 
-                arrayTypes  : /^anchors$|^paths$/,
+                arrayTypes  : /^anchors$|^paths$|^actions$/,
                 objectTypes : /^grid$|^gridOffset$/,
                 stringTypes : /^mode$/,
-                numberTypes : /^range$/
+                numberTypes : /^range$/,
+                boolTypes   :  /^endOnly$/
             },
             snapEnabled : false,
 
-            autoScroll: {
-                container   : window,  // the item that is scrolled
-                margin      : 60,
-                interval    : 20,      // pause in ms between each scroll pulse
-                distance    : 10,      // the distance in x and y that the page is scrolled
+            restrict: {
+                drag: null,
+                resize: null,
+                gesture: null,
+                endOnly: false
+            },
+            restrictEnabled: true,
 
-                elementTypes: /^container$/,
-                numberTypes : /^range$|^interval$|^distance$/
+            autoScroll: {
+                container   : window,  // the item that is scrolled (Window or HTMLElement)
+                margin      : 60,
+                speed       : 300,      // the scroll speed in pixels per second
+
+                numberTypes : /^margin$|^speed$/
             },
             autoScrollEnabled: false,
+
+            inertia: {
+                resistance : 10,    // the lambda in exponential decay
+                minSpeed   : 100,   // target speed must be above this for inertia to start
+                endSpeed   : 10,    // the speed at which inertia is slow enough to stop
+                actions    : ['drag', 'resize'],
+
+                numberTypes: /^resistance$|^minSpeed$|^endSpeed$/,
+                arrayTypes : /^actions$/
+            },
+            inertiaEnabled: false,
 
             origin      : { x: 0, y: 0 },
             deltaSource : 'page'
@@ -104,26 +193,45 @@
             paths  : []
         },
 
+        restrictStatus = {
+            dx: 0,
+            dy: 0,
+            snap: snapStatus,
+            restricted: false
+        },
+
         // Things related to autoScroll
         autoScroll = {
-            margin   : 60,      // page margin in which pointer triggers autoScroll
-            interval : 20,      // pause in ms between each scroll pulse
-            i        : null,    // the handle returned by window.setInterval
-            distance : 10,      // the distance in x and y that the page is scrolled
-
-            x: 0,               // Direction each pulse is to scroll in
+            target: null,
+            i: null,    // the handle returned by window.setInterval
+            x: 0,       // Direction each pulse is to scroll in
             y: 0,
 
             // scroll the window by the values in scroll.x/y
             scroll: function () {
-                var container = target.options.autoScroll.container;
+                var options = autoScroll.target.options.autoScroll,
+                    container = options.container,
+                    now = new Date().getTime(),
+                    // change in time in seconds
+                    dt = (now - autoScroll.prevTime) / 1000,
+                    // displacement
+                    s = options.speed * dt;
 
-                if (container === window) {
-                    window.scrollBy(autoScroll.x, autoScroll.y);
+                if (s >= 1) {
+                    if (container instanceof window.Window) {
+                        container.scrollBy(autoScroll.x * s, autoScroll.y * s);
+                    }
+                    else if (container) {
+                        container.scrollLeft += autoScroll.x * s;
+                        container.scrollTop  += autoScroll.y * s;
+                    }
+
+                    autoScroll.prevTime = now;
                 }
-                else if (container) {
-                    container.scrollLeft += autoScroll.x;
-                    container.scrollTop  += autoScroll.y;
+
+                if (autoScroll.isScrolling) {
+                    cancelFrame(autoScroll.i);
+                    autoScroll.i = reqFrame(autoScroll.scroll);
                 }
             },
 
@@ -135,14 +243,14 @@
                         left,
                         options = target.options.autoScroll;
 
-                    if (options.container === window) {
+                    if (options.container instanceof window.Window) {
                         left   = event.clientX < autoScroll.margin;
                         top    = event.clientY < autoScroll.margin;
-                        right  = event.clientX > window.innerWidth  - autoScroll.margin;
-                        bottom = event.clientY > window.innerHeight - autoScroll.margin;
+                        right  = event.clientX > options.container.innerWidth  - autoScroll.margin;
+                        bottom = event.clientY > options.container.innerHeight - autoScroll.margin;
                     }
                     else {
-                        var rect = interact(options.container).getRect();
+                        var rect = getElementRect(options.container);
 
                         left   = event.clientX < rect.left   + autoScroll.margin;
                         top    = event.clientY < rect.top    + autoScroll.margin;
@@ -150,31 +258,34 @@
                         bottom = event.clientY > rect.bottom - autoScroll.margin;
                     }
 
-                    autoScroll.x = autoScroll.distance * (right ? 1: left? -1: 0);
-                    autoScroll.y = autoScroll.distance * (bottom? 1:  top? -1: 0);
+                    autoScroll.x = (right ? 1: left? -1: 0);
+                    autoScroll.y = (bottom? 1:  top? -1: 0);
 
                     if (!autoScroll.isScrolling) {
                         // set the autoScroll properties to those of the target
-                        autoScroll.margin   = options.margin;
-                        autoScroll.distance = options.distance;
-                        autoScroll.interval = options.interval;
+                        autoScroll.margin = options.margin;
+                        autoScroll.speed  = options.speed;
 
-                        autoScroll.start();
+                        autoScroll.start(target);
                     }
                 }
             },
 
             isScrolling: false,
+            prevTime: 0,
 
-            start: function () {
+            start: function (target) {
                 autoScroll.isScrolling = true;
-                window.clearInterval(autoScroll.i);
-                autoScroll.i = window.setInterval(autoScroll.scroll, autoScroll.interval);
+                cancelFrame(autoScroll.i);
+
+                autoScroll.target = target;
+                autoScroll.prevTime = new Date().getTime();
+                autoScroll.i = reqFrame(autoScroll.scroll);
             },
 
             stop: function () {
-                window.clearInterval(autoScroll.i);
                 autoScroll.isScrolling = false;
+                cancelFrame(autoScroll.i);
             }
         },
 
@@ -186,7 +297,6 @@
 
         pointerIsDown   = false,
         pointerWasMoved = false,
-        imPropStopped   = false,
         gesturing       = false,
         dragging        = false,
         dynamicDrop     = false,
@@ -232,27 +342,31 @@
         wheelEvent = 'onmousewheel' in document? 'mousewheel': 'wheel',
 
         eventTypes = [
-            'resizestart',
-            'resizemove',
-            'resizeend',
             'dragstart',
             'dragmove',
+            'draginertiastart',
             'dragend',
             'dragenter',
             'dragleave',
             'drop',
+            'resizestart',
+            'resizemove',
+            'resizeinertiastart',
+            'resizeend',
             'gesturestart',
             'gesturemove',
+            'gestureinertiastart',
             'gestureend',
 
-            'tap'
+            'tap',
+            'doubletap'
         ],
 
         globalEvents = {},
 
         fireStates = {
-            onevent   : 0,
-            directBind: 1,
+            directBind: 0,
+            onevent   : 1,
             globalBind: 2
         },
 
@@ -271,6 +385,10 @@
         // will be polyfill function if browser is IE8
         IE8MatchesSelector,
 
+        // native requestAnimationFrame or polyfill
+        reqFrame = window.requestAnimationFrame,
+        cancelFrame = window.cancelAnimationFrame,
+
         // used for adding event listeners to window and document
         windowTarget = {
             _element: window,
@@ -285,21 +403,21 @@
             events  : {}
         },
         parentDocTarget = {
-            _element: window.parent.document,
+            _element: null,
             events  : {}
         },
 
         // Events wrapper
         events = (function () {
-            /* jshint -W001 */ // ignore warning about setting IE8 Event#hasOwnProperty
             var Event = window.Event,
                 useAttachEvent = 'attachEvent' in window && !('addEventListener' in window),
                 addEvent = !useAttachEvent?  'addEventListener': 'attachEvent',
                 removeEvent = !useAttachEvent?  'removeEventListener': 'detachEvent',
                 on = useAttachEvent? 'on': '',
 
-                elements = [],
-                targets  = [];
+                elements          = [],
+                targets           = [],
+                attachedListeners = [];
 
             if (!('indexOf' in Array.prototype)) {
                 Array.prototype.indexOf = function(elt /*, from*/)   {
@@ -338,11 +456,13 @@
                 };
             }
             if (!('hasOwnProperty' in Event.prototype)) {
+                /* jshint -W001 */ // ignore warning about setting IE8 Event#hasOwnProperty
                 Event.prototype.hasOwnProperty = Object.prototype.hasOwnProperty;
             }
 
             function add (element, type, listener, useCapture) {
-                var target = targets[elements.indexOf(element)];
+                var elementIndex = elements.indexOf(element),
+                    target = targets[elementIndex];
 
                 if (!target) {
                     target = {
@@ -350,11 +470,17 @@
                         typeCount: 0
                     };
 
-                    elements.push(element);
+                    elementIndex = elements.push(element) - 1;
                     targets.push(target);
+
+                    attachedListeners.push((useAttachEvent ? {
+                            supplied: [],
+                            wrapped:  [],
+                            useCount: []
+                        } : null));
                 }
 
-                if (!(type in target.events)) {
+                if (!target.events[type]) {
                     target.events[type] = [];
                     target.typeCount++;
                 }
@@ -363,7 +489,10 @@
                     var ret;
 
                     if (useAttachEvent) {
-                        ret = element[addEvent](on + type, function (event) {
+                        var listeners = attachedListeners[elementIndex],
+                            listenerIndex = listeners.supplied.indexOf(listener);
+
+                        var wrapped = listeners.wrapped[listenerIndex] || function (event) {
                             if (!event.immediatePropagationStopped) {
                                 event.target = event.srcElement;
                                 event.currentTarget = element;
@@ -375,7 +504,18 @@
 
                                 listener(event);
                             }
-                        }, listener, useCapture || false);
+                        };
+
+                        ret = element[addEvent](on + type, wrapped, Boolean(useCapture));
+
+                        if (listenerIndex === -1) {
+                            listeners.supplied.push(listener);
+                            listeners.wrapped.push(wrapped);
+                            listeners.useCount.push(1);
+                        }
+                        else {
+                            listeners.useCount[listenerIndex]++;
+                        }
                     }
                     else {
                         ret = element[addEvent](type, listener, useCapture || false);
@@ -388,10 +528,20 @@
 
             function remove (element, type, listener, useCapture) {
                 var i,
-                target = targets[elements.indexOf(element)];
+                    elementIndex = elements.indexOf(element),
+                    target = targets[elementIndex],
+                    listeners,
+                    listenerIndex,
+                    wrapped = listener;
 
                 if (!target || !target.events) {
                     return;
+                }
+
+                if (useAttachEvent) {
+                    listeners = attachedListeners[elementIndex];
+                    listenerIndex = listeners.supplied.indexOf(listener);
+                    wrapped = listeners.wrapped[listenerIndex];
                 }
 
                 if (type === 'all') {
@@ -408,21 +558,28 @@
 
                     if (listener === 'all') {
                         for (i = 0; i < len; i++) {
-                            element[removeEvent](on + type, target.events[type][i], useCapture || false);
+                            remove(element, type, target.events[type][i], Boolean(useCapture));
                         }
-                        target.events[type] = null;
-                        target.typeCount--;
                     } else {
                         for (i = 0; i < len; i++) {
                             if (target.events[type][i] === listener) {
-
-                                element[removeEvent](on + type, target.events[type][i], useCapture || false);
+                                element[removeEvent](on + type, wrapped, useCapture || false);
                                 target.events[type].splice(i, 1);
+
+                                if (useAttachEvent && listeners) {
+                                    listeners.useCount[listenerIndex]--;
+                                    if (listeners.useCount[listenerIndex] === 0) {
+                                        listeners.supplied.splice(listenerIndex, 1);
+                                        listeners.wrapped.splice(listenerIndex, 1);
+                                        listeners.useCount.splice(listenerIndex, 1);
+                                    }
+                                }
 
                                 break;
                             }
                         }
                     }
+
                     if (target.events[type] && target.events[type].length === 0) {
                         target.events[type] = null;
                         target.typeCount--;
@@ -430,8 +587,9 @@
                 }
 
                 if (!target.typeCount) {
-                    targets.splice(targets.indexOf(target), 1);
-                    elements.splice(elements.indexOf(element), 1);
+                    targets.splice(elementIndex);
+                    elements.splice(elementIndex);
+                    attachedListeners.splice(elementIndex);
                 }
             }
 
@@ -450,23 +608,53 @@
 
     function blank () {}
 
-    function setPrevXY (event) {
-        prevX = event.pageX;
-        prevY = event.pageY;
+    function isElement (o) {
+        return !!o && (
+            typeof Element === "object" ? o instanceof Element : //DOM2
+            o && typeof o === "object" && o !== null && o.nodeType === 1 && typeof o.nodeName==="string"
+        );
+    }
 
-        prevClientX = event.clientX;
-        prevClientY = event.clientY;
+    function setEventXY (targetObj, source) {
+        getPageXY(source, tmpXY);
+        targetObj.pageX = tmpXY.x;
+        targetObj.pageY = tmpXY.y;
+
+        getClientXY(source, tmpXY);
+        targetObj.clientX = tmpXY.x;
+        targetObj.clientY = tmpXY.y;
+
+        targetObj.timeStamp = new Date().getTime();
+    }
+
+    function setEventDeltas (targetObj, prev, cur) {
+        targetObj.pageX     = cur.pageX      - prev.pageX;
+        targetObj.pageY     = cur.pageY      - prev.pageY;
+        targetObj.clientX   = cur.clientX    - prev.clientX;
+        targetObj.clientY   = cur.clientY    - prev.clientY;
+        targetObj.timeStamp = new Date().getTime() - prev.timeStamp;
+
+        // set pointer velocity
+        var dt = Math.max(targetObj.timeStamp / 1000, 0.001);
+        targetObj.pageSpeed   = hypot(targetObj.pageX, targetObj.pageY) / dt;
+        targetObj.pageVX      = targetObj.pageX / dt;
+        targetObj.pageVY      = targetObj.pageY / dt;
+
+        targetObj.clientSpeed = hypot(targetObj.clientX, targetObj.pageY) / dt;
+        targetObj.clientVX      = targetObj.clientX / dt;
+        targetObj.clientVY      = targetObj.clientY / dt;
     }
 
     // Get specified X/Y coords for mouse or event.touches[0]
-    function getXY (type, event) {
+    function getXY (type, event, xy) {
         var touch,
             x,
             y;
 
+        xy = xy || {};
         type = type || 'page';
 
-        if (event.touches) {
+        if (/touch/.test(event.type) && event.touches) {
             touch = (event.touches.length)?
                 event.touches[0]:
                 event.changedTouches[0];
@@ -478,28 +666,69 @@
             y = event[type + 'Y'];
         }
 
-        return {
-            x: x,
-            y: y
-        };
+        xy.x = x;
+        xy.y = y;
+
+        return xy;
     }
 
-    function getPageXY (event) {
+    function getPageXY (event, page) {
+        page = page || {};
+
+        if (event instanceof InteractEvent) {
+            if (/inertiastart/.test(event.type)) {
+                getPageXY(inertiaStatus.pointerUp, page);
+
+                page.x += inertiaStatus.sx;
+                page.y += inertiaStatus.sy;
+            }
+            else {
+                page.x = event.pageX;
+                page.y = event.pageY;
+            }
+        }
         // Opera Mobile handles the viewport and scrolling oddly
-        if (isOperaMobile) {
-            var page = getXY('screen', event);
+        else if (isOperaMobile) {
+            getXY('screen', event, page);
 
             page.x += window.scrollX;
             page.y += window.scrollY;
-
-            return page;
         }
-        return getXY('page', event);
+        // MSGesture events don't have pageX/Y
+        else if (/gesture|inertia/i.test(event.type)) {
+            getXY('client', event, page);
+
+            page.x += document.documentElement.scrollLeft;
+            page.y += document.documentElement.scrollTop;
+        }
+        else {
+            getXY('page', event, page);
+        }
+
+        return page;
     }
 
-    function getClientXY (event) {
-        // Opera Mobile handles the viewport and scrolling oddly
-        return getXY(isOperaMobile? 'screen': 'client', event);
+    function getClientXY (event, client) {
+        client = client || {};
+
+        if (event instanceof InteractEvent) {
+            if (/inertiastart/.test(event.type)) {
+                getClientXY(inertiaStatus.pointerUp, client);
+
+                client.x += inertiaStatus.sx;
+                client.y += inertiaStatus.sy;
+            }
+            else {
+                client.x = event.clientX;
+                client.y = event.clientY;
+            }
+        }
+        else {
+            // Opera Mobile handles the viewport and scrolling oddly
+            getXY(isOperaMobile? 'screen': 'client', event, client);
+        }
+
+        return client;
     }
 
     function getScrollXY () {
@@ -509,52 +738,74 @@
         };
     }
 
-    function touchAverage (event) {
-        var i,
-            touches = event.touches,
-            pageX = 0,
-            pageY = 0,
-            clientX = 0,
-            clientY = 0;
+    function getElementRect (element) {
+        var scroll = /ipad|iphone|ipod/i.test(navigator.userAgent)
+                ? { x: 0, y: 0 }
+                : getScrollXY(),
+            clientRect = (element instanceof SVGElement)?
+                element.getBoundingClientRect():
+                element.getClientRects()[0];
 
-        for (i = 0; i < touches.length; i++) {
-            pageX += touches[i].pageX / touches.length;
-            pageY += touches[i].pageY / touches.length;
-
-            clientX += touches[i].clientX / touches.length;
-            clientY += touches[i].clientY / touches.length;
-        }
-
-        return {
-            pageX: pageX,
-            pageY: pageY,
-            clientX: clientX,
-            clientY: clientY
+        return clientRect && {
+            left  : clientRect.left   + scroll.x,
+            right : clientRect.right  + scroll.x,
+            top   : clientRect.top    + scroll.y,
+            bottom: clientRect.bottom + scroll.y,
+            width : clientRect.width || clientRect.right - clientRect.left,
+            height: clientRect.heigh || clientRect.bottom - clientRect.top
         };
     }
 
-    function getTouchBBox (event) {
-        if (!event.touches.length) {
+    function getTouchPair (event) {
+        var touches = [];
+
+        if (event instanceof Array) {
+            touches[0] = event[0];
+            touches[1] = event[1];
+        }
+        else if (PointerEvent) {
+            touches[0] = pointerMoves[0];
+            touches[1] = pointerMoves[1];
+        }
+        else {
+            touches[0] = event.touches[0];
+
+            if (event.type === 'touchend' && event.touches.length === 1) {
+                touches[1] = event.changedTouches[0];
+            }
+            else {
+                touches[1] = event.touches[1];
+            }
+        }
+
+        return touches;
+    }
+
+    function touchAverage (event) {
+        var touches = getTouchPair(event);
+
+        return {
+            pageX: (touches[0].pageX + touches[1].pageX) / 2,
+            pageY: (touches[0].pageY + touches[1].pageY) / 2,
+            clientX: (touches[0].clientX + touches[1].clientX) / 2,
+            clientY: (touches[0].clientY + touches[1].clientY) / 2,
+        };
+    }
+
+    function touchBBox (event) {
+        if (!(event.touches && event.touches.length) && !(PointerEvent && pointerMoves.length)) {
             return;
         }
 
-        var i,
-            touches = event.touches,
-            minX = event.touches[0].pageX,
-            minY = event.touches[0].pageY,
-            maxX = minX,
-            maxY = minY;
-
-        for (i = 1; i < touches.length; i++) {
-            minX = minX > event.touches[i].pageX?
-                minX:
-                event.touches[i].pageX;
-            minY = minX > event.touches[i].pageX?
-                minY:
-                event.touches[i].pageY;
-        }
+        var touches = getTouchPair(event),
+            minX = Math.min(touches[0].pageX, touches[1].pageX),
+            minY = Math.min(touches[0].pageY, touches[1].pageY),
+            maxX = Math.max(touches[0].pageX, touches[1].pageX),
+            maxY = Math.max(touches[0].pageY, touches[1].pageY);
 
         return {
+            x: minX,
+            y: minY,
             left: minX,
             top: minY,
             width: maxX - minX,
@@ -566,44 +817,129 @@
         var deltaSource = (target && target.options || defaultOptions).deltaSource,
             sourceX = deltaSource + 'X',
             sourceY = deltaSource + 'Y',
-            dx = event.touches[0][sourceX],
-            dy = event.touches[0][sourceY];
+            touches = getTouchPair(event);
 
-        if (event.type === 'touchend' && event.touches.length === 1) {
-            dx -= event.changedTouches[0][sourceX];
-            dy -= event.changedTouches[0][sourceY];
-        }
-        else {
-            dx -= event.touches[1][sourceX];
-            dy -= event.touches[1][sourceY];
-        }
 
-        return Math.sqrt(dx * dx + dy * dy);
+        var dx = touches[0][sourceX] - touches[1][sourceX],
+            dy = touches[0][sourceY] - touches[1][sourceY];
+
+        return hypot(dx, dy);
     }
 
-    function touchAngle (event) {
+    function touchAngle (event, prevAngle) {
         var deltaSource = (target && target.options || defaultOptions).deltaSource,
             sourceX = deltaSource + 'X',
             sourceY = deltaSource + 'Y',
-            dx = event.touches[0][sourceX],
-            dy = event.touches[0][sourceY];
+            touches = getTouchPair(event),
+            dx = touches[0][sourceX] - touches[1][sourceX],
+            dy = touches[0][sourceY] - touches[1][sourceY],
+            angle = 180 * Math.atan(dy / dx) / Math.PI;
 
-        if (event.type === 'touchend' && event.touches.length === 1) {
-            dx -= event.changedTouches[0][sourceX];
-            dy -= event.changedTouches[0][sourceY];
-        }
-        else {
-            dx -= event.touches[1][sourceX];
-            dy -= event.touches[1][sourceY];
+        if (typeof prevAngle === 'number') {
+            var dr = angle - prevAngle,
+                drClamped = dr % 360;
+
+            if (drClamped > 315) {
+                angle -= 360 + (angle / 360)|0 * 360;
+            }
+            else if (drClamped > 135) {
+                angle -= 180 + (angle / 360)|0 * 360;
+            }
+            else if (drClamped < -315) {
+                angle += 360 + (angle / 360)|0 * 360;
+            }
+            else if (drClamped < -135) {
+                angle += 180 + (angle / 360)|0 * 360;
+            }
         }
 
-        return 180 * -Math.atan(dy / dx) / Math.PI;
+        return  angle;
+    }
+
+    function getOriginXY (interactable, element) {
+        interactable = interactable || target;
+
+        var origin = interactable
+                ? interactable.options.origin
+                : defaultOptions.origin;
+
+        element = element || interactable._element;
+
+        if (origin === 'parent') {
+            origin = element.parentNode;
+        }
+        else if (origin === 'self') {
+            origin = element;
+        }
+
+        if (isElement(origin))  {
+            origin = getElementRect(origin);
+
+            origin.x = origin.left;
+            origin.y = origin.top;
+        }
+        else if (typeof origin === 'function') {
+            origin = origin(interactable && element);
+        }
+
+        return origin;
     }
 
     function calcRects (interactableList) {
         for (var i = 0, len = interactableList.length; i < len; i++) {
             interactableList[i].rect = interactableList[i].getRect();
         }
+    }
+
+    function inertiaFrame () {
+        var options = inertiaStatus.target.options.inertia,
+            lambda = options.resistance,
+            t = new Date().getTime() / 1000 - inertiaStatus.t0;
+
+        if (t < inertiaStatus.te) {
+
+            var progress =  1 - (Math.exp(-lambda * t) - inertiaStatus.lambda_v0) / inertiaStatus.one_ve_v0;
+
+            if (inertiaStatus.modifiedXe === inertiaStatus.xe && inertiaStatus.modifiedYe === inertiaStatus.ye) {
+                inertiaStatus.sx = inertiaStatus.xe * progress;
+                inertiaStatus.sy = inertiaStatus.ye * progress;
+            }
+            else {
+                var quadPoint = getQuadraticCurvePoint(
+                        0, 0,
+                        inertiaStatus.xe, inertiaStatus.ye,
+                        inertiaStatus.modifiedXe, inertiaStatus.modifiedYe,
+                        progress);
+
+                inertiaStatus.sx = quadPoint.x;
+                inertiaStatus.sy = quadPoint.y;
+            }
+
+            pointerMove(inertiaStatus.startEvent);
+
+            inertiaStatus.i = reqFrame(inertiaFrame);
+        }
+        else {
+            inertiaStatus.sx = inertiaStatus.modifiedXe;
+            inertiaStatus.sy = inertiaStatus.modifiedYe;
+
+            inertiaStatus.active = false;
+
+            pointerMove(inertiaStatus.startEvent);
+            pointerUp(inertiaStatus.startEvent);
+        }
+    }
+
+    function _getQBezierValue(t, p1, p2, p3) {
+        var iT = 1 - t;
+        return iT * iT * p1 + 2 * iT * t * p2 + t * t * p3;
+    }
+
+    function getQuadraticCurvePoint(startX, startY, cpX, cpY, endX, endY, position) {
+        return {
+            x:  _getQBezierValue(position, startX, cpX, endX),
+            y:  _getQBezierValue(position, startY, cpY, endY)
+        };
     }
 
     // Test for the element that's "above" all other qualifiers
@@ -684,30 +1020,45 @@
         }
     }
 
-    function getDrop (event, draggable) {
+    function getDrop (event, element) {
         if (dropzones.length || selectorDZs.length) {
             var i,
                 drops = [],
                 elements = [],
                 selectorDrops = [],
                 selectorElements = [],
-                drop;
+                drop,
+                dropzone;
+
+            element = element || target._element;
 
             // collect all element dropzones that qualify for a drop
             for (i = 0; i < dropzones.length; i++) {
-                if (dropzones[i].dropCheck(event)) {
-                    drops.push(dropzones[i]);
-                    elements.push(dropzones[i]._element);
+                var current = dropzones[i];
+
+                // if the dropzone has an accept option, test against it
+                if (isElement(current.options.accept)) {
+                    if (current.options.accept !== element) {
+                        continue;
+                    }
+                }
+                else if (typeof current.options.accept === 'string') {
+                    if (!element[matchesSelector](current.options.accept)) {
+                        continue;
+                    }
+                }
+
+                if (element !== current._element && current.dropCheck(event, target, element)) {
+                    drops.push(current);
+                    elements.push(current._element);
                 }
             }
 
             // get the most apprpriate dropzone based on DOM depth and order
             drop = resolveDrops(elements);
-            dropTarget = drop? dropzones[drop.index]: null;
+            dropzone = drop? drops[drop.index]: null;
 
             if (selectorDZs.length) {
-                var draggableElement = target._element;
-
                 for (i = 0; i < selectorDZs.length; i++) {
                     var selector = selectorDZs[i],
                         nodeList = document.querySelectorAll(selector.selector);
@@ -716,10 +1067,22 @@
                         selector._element = nodeList[j];
                         selector.rect = selector.getRect();
 
-                        if (selector._element !== draggableElement
+                        // if the dropzone has an accept option, test against it
+                        if (isElement(selector.options.accept)) {
+                            if (selector.options.accept !== element) {
+                                continue;
+                            }
+                        }
+                        else if (typeof selector.options.accept === 'string') {
+                            if (!element[matchesSelector](selector.options.accept)) {
+                                continue;
+                            }
+                        }
+
+                        if (selector._element !== element
                             && elements.indexOf(selector._element) === -1
                             && selectorElements.indexOf(selector._element === -1)
-                            && selector.dropCheck(event)) {
+                            && selector.dropCheck(event, target)) {
 
                             selectorDrops.push(selector);
                             selectorElements.push(selector._element);
@@ -728,24 +1091,27 @@
                 }
 
                 if (selectorElements.length) {
-                    if (dropTarget) {
-                        selectorDrops.push(dropTarget);
-                        selectorElements.push(dropTarget._element);
+                    if (dropzone) {
+                        selectorDrops.push(dropzone);
+                        selectorElements.push(dropzone._element);
                     }
 
                     drop = resolveDrops(selectorElements);
 
                     if (drop) {
-                        dropTarget = selectorDrops[drop.index];
+                        dropzone = selectorDrops[drop.index];
 
-                        if (dropTarget.selector) {
-                            dropTarget._element = selectorElements[drop.index];
+                        if (dropzone.selector) {
+                            dropzone._element = selectorElements[drop.index];
                         }
                     }
                 }
             }
 
-            return dropTarget;
+            return dropzone? {
+                dropzone: dropzone,
+                element: dropzone._element
+            }: null;
         }
     }
 
@@ -755,30 +1121,31 @@
             deltaSource = (target && target.options || defaultOptions).deltaSource,
             sourceX = deltaSource + 'X',
             sourceY = deltaSource + 'Y',
-            options = target? target.options: defaultOptions;
+            options = target? target.options: defaultOptions,
+            origin = getOriginXY(target, element);
 
         element = element || target._element;
 
-        if (action === 'gesture') {
+        if (action === 'gesture' && !PointerEvent) {
             var average = touchAverage(event);
 
-            page   = { x: (average.pageX   - options.origin.x), y: (average.pageY   - options.origin.y) };
-            client = { x: (average.clientX - options.origin.x), y: (average.clientY - options.origin.y) };
+            page   = { x: (average.pageX   - origin.x), y: (average.pageY   - origin.y) };
+            client = { x: (average.clientX - origin.x), y: (average.clientY - origin.y) };
         }
         else {
 
+            page   = getPageXY(event);
             client = getClientXY(event);
-            page = getPageXY(event);
 
-            page.x -= options.origin.x;
-            page.y -= options.origin.y;
+            page.x -= origin.x;
+            page.y -= origin.y;
 
-            if (target.options.snapEnabled) {
-                var snap = options.snap;
+            client.x -= origin.x;
+            client.y -= origin.y;
+
+            if (options.snapEnabled && options.snap.actions.indexOf(action) !== -1) {
 
                 this.snap = {
-                    mode   : snap.mode,
-                    anchors: snapStatus.anchors,
                     range  : snapStatus.range,
                     locked : snapStatus.locked,
                     x      : snapStatus.x,
@@ -790,66 +1157,80 @@
                 };
 
                 if (snapStatus.locked) {
-                    if (snap.mode === 'path') {
-                        if (snapStatus.xInRange) {
-                            page.x += snapStatus.dx;
-                            client.x += snapStatus.dx;
-                        }
-                        if (snapStatus.yInRange) {
-                            page.y += snapStatus.dy;
-                            client.y += snapStatus.dy;
-                        }
-                    }
-                    else {
-                        page.x += snapStatus.dx;
-                        page.y += snapStatus.dy;
-                        client.x += snapStatus.dx;
-                        client.y += snapStatus.dy;
-                    }
+                    page.x += snapStatus.dx;
+                    page.y += snapStatus.dy;
+                    client.x += snapStatus.dx;
+                    client.y += snapStatus.dy;
                 }
             }
         }
 
-        this.x0        = x0;
-        this.y0        = y0;
-        this.clientX0  = clientX0;
-        this.clientY0  = clientY0;
+        if (target.options.restrict[action] && restrictStatus.restricted) {
+            page.x += restrictStatus.dx;
+            page.y += restrictStatus.dy;
+            client.x += restrictStatus.dx;
+            client.y += restrictStatus.dy;
+
+            this.restrict = {
+                dx: restrictStatus.dx,
+                dy: restrictStatus.dy
+            };
+        }
+
         this.pageX     = page.x;
         this.pageY     = page.y;
         this.clientX   = client.x;
         this.clientY   = client.y;
+
+        if (phase === 'start' && !(event instanceof InteractEvent)) {
+            setEventXY(startCoords, this);
+        }
+
+        this.x0        = startCoords.pageX;
+        this.y0        = startCoords.pageY;
+        this.clientX0  = startCoords.clientX;
+        this.clientY0  = startCoords.clientY;
         this.ctrlKey   = event.ctrlKey;
         this.altKey    = event.altKey;
         this.shiftKey  = event.shiftKey;
         this.metaKey   = event.metaKey;
         this.button    = event.button;
         this.target    = element;
-        this.timeStamp = new Date().getTime();
+        this.t0        = downTime;
         this.type      = action + (phase || '');
+
+        if (inertiaStatus.active) {
+            this.detail = 'inertia';
+        }
 
         if (related) {
             this.relatedTarget = related;
         }
 
-        // start/end event dx, dy is difference between start and current points
-        if (phase === 'start' || phase === 'end' || action === 'drop') {
+        // end event dx, dy is difference between start and end points
+        if (phase === 'end' || action === 'drop') {
             if (deltaSource === 'client') {
-                this.dx = client.x - x0;
-                this.dy = client.y - y0;
+                this.dx = client.x - startCoords.clientX;
+                this.dy = client.y - startCoords.clientY;
             }
             else {
-                this.dx = page.x - x0;
-                this.dy = page.y - y0;
+                this.dx = page.x - startCoords.pageX;
+                this.dy = page.y - startCoords.pageY;
             }
+        }
+        // copy properties from previousmove if starting inertia
+        else if (phase === 'inertiastart') {
+            this.dx = prevEvent.dx;
+            this.dy = prevEvent.dy;
         }
         else {
             if (deltaSource === 'client') {
-                this.dx = client.x - prevClientX;
-                this.dy = client.y - prevClientY;
+                this.dx = client.x - prevEvent.clientX;
+                this.dy = client.y - prevEvent.clientY;
             }
             else {
-                this.dx = page.x - prevX;
-                this.dy = page.y - prevY;
+                this.dx = page.x - prevEvent.pageX;
+                this.dy = page.y - prevEvent.pageY;
             }
         }
 
@@ -875,37 +1256,226 @@
             }
         }
         else if (action === 'gesture') {
-            this.touches  = event.touches;
-            this.distance = touchDistance(event);
-            this.box      = getTouchBBox(event);
-            this.angle    = touchAngle(event);
+            this.touches = (PointerEvent
+                            ? [pointerMoves[0], pointerMoves[1]]
+                            : event.touches);
 
             if (phase === 'start') {
-                this.scale = 1;
-                this.ds = 0;
-                this.rotation = 0;
+                this.distance = touchDistance(event);
+                this.box      = touchBBox(event);
+                this.scale    = 1;
+                this.ds       = 0;
+                this.angle    = touchAngle(event);
+                this.da       = 0;
+            }
+            else if (phase === 'end' || event instanceof InteractEvent) {
+                this.distance = prevEvent.distance;
+                this.box      = prevEvent.box;
+                this.scale    = prevEvent.scale;
+                this.ds       = this.scale - 1;
+                this.angle    = prevEvent.angle;
+                this.da       = this.angle - gesture.startAngle;
             }
             else {
-                this.scale = this.distance / gesture.startDistance;
-                if (phase === 'end') {
-                    this.rotation = this.angle - gesture.startAngle;
-                    this.ds = this.scale - 1;
+                this.distance = touchDistance(event);
+                this.box      = touchBBox(event);
+                this.scale    = this.distance / gesture.startDistance;
+                this.angle    = touchAngle(event, gesture.prevAngle);
+
+                this.ds = this.scale - gesture.prevScale;
+                this.da = this.angle - gesture.prevAngle;
+            }
+        }
+
+        if (phase === 'start') {
+            this.timeStamp = downTime;
+            this.dt        = 0;
+            this.duration  = 0;
+            this.speed     = 0;
+            this.velocityX = 0;
+            this.velocityY = 0;
+        }
+        else if (phase === 'inertiastart') {
+            this.timeStamp = new Date().getTime();
+            this.dt        = prevEvent.dt;
+            this.duration  = prevEvent.duration;
+            this.speed     = prevEvent.speed;
+            this.velocityX = prevEvent.velocityX;
+            this.velocityY = prevEvent.velocityY;
+        }
+        else {
+            this.timeStamp = new Date().getTime();
+            this.dt        = this.timeStamp - prevEvent.timeStamp;
+            this.duration  = this.timeStamp - downTime;
+
+            var dx, dy, dt;
+
+            // Use natural event coordinates (without snapping/restricions)
+            // subtract modifications from previous event if event given is
+            // not a native event
+            if (phase === 'end' || event instanceof InteractEvent) {
+                // change in time in seconds
+                // use event sequence duration for end events
+                // => average speed of the event sequence
+                // (minimum dt of 1ms)
+                dt = Math.max((phase === 'end'? this.duration: this.dt) / 1000, 0.001);
+                dx = this[sourceX] - prevEvent[sourceX];
+                dy = this[sourceY] - prevEvent[sourceY];
+
+                if (this.snap && this.snap.locked) {
+                    dx -= this.snap.dx;
+                    dy -= this.snap.dy;
                 }
-                else {
-                    this.rotation = this.angle - gesture.prevAngle;
-                    this.ds = this.scale - gesture.prevScale;
+
+                if (this.restrict) {
+                    dx -= this.restrict.dx;
+                    dy -= this.restrict.dy;
                 }
+
+                if (prevEvent.snap && prevEvent.snap.locked) {
+                    dx -= (prevEvent[sourceX] - prevEvent.snap.dx);
+                    dy -= (prevEvent[sourceY] - prevEvent.snap.dy);
+                }
+
+                if (prevEvent.restrict) {
+                    dx += prevEvent.restrict.dx;
+                    dy += prevEvent.restrict.dy;
+                }
+
+                // speed and velocity in pixels per second
+                this.speed = hypot(dx, dy) / dt;
+                this.velocityX = dx / dt;
+                this.velocityY = dy / dt;
+            }
+            // if normal move event, use previous user event coords
+            else {
+                this.speed = pointerDelta[deltaSource + 'Speed'];
+                this.velocityX = pointerDelta[deltaSource + 'VX'];
+                this.velocityY = pointerDelta[deltaSource + 'VY'];
             }
         }
     }
 
     InteractEvent.prototype = {
         preventDefault: blank,
-        stopImmediatePropagation: function (event) {
-            imPropStopped = true;
+        stopImmediatePropagation: function () {
+            this.immediatePropagationStopped = this.propagationStopped = true;
         },
-        stopPropagation: blank
+        stopPropagation: function () {
+            this.propagationStopped = true;
+        }
     };
+
+    function preventOriginalDefault () {
+        this.originalEvent.preventDefault();
+    }
+
+    function fireTaps (event, targets, elements) {
+        var tap = {},
+            prop, i;
+
+        for (prop in event) {
+            if (event.hasOwnProperty(prop)) {
+                tap[prop] = event[prop];
+            }
+        }
+
+        tap.preventDefault           = preventOriginalDefault;
+        tap.stopPropagation          = InteractEvent.prototype.stopPropagation;
+        tap.stopImmediatePropagation = InteractEvent.prototype.stopImmediatePropagation;
+
+        tap.timeStamp     = new Date().getTime();
+        tap.originalEvent = event;
+        tap.dt            = tap.timeStamp - downTime;
+        tap.type          = 'tap';
+
+        var interval = tap.timeStamp - tapTime,
+            dbl = (prevTap && prevTap.type !== 'dubletap'
+                   && prevTap.target === tap.target
+                   && interval < 500);
+
+        tapTime = tap.timeStamp;
+
+        for (i = 0; i < targets.length; i++) {
+            var origin = getOriginXY(targets[i], elements[i]);
+
+            tap.pageX -= origin.x;
+            tap.pageY -= origin.y;
+            tap.clientX -= origin.x;
+            tap.clientY -= origin.y;
+
+            tap.currentTarget = elements[i];
+            targets[i].fire(tap);
+
+            if (tap.immediatePropagationStopped
+                ||(tap.propagationStopped && targets[i + 1] !== tap.currentTarget)) {
+                break;
+            }
+        }
+
+        if (dbl) {
+            var doubleTap = {};
+
+            for (prop in tap) {
+                doubleTap[prop] = tap[prop];
+            }
+
+            doubleTap.dt   = interval;
+            doubleTap.type = 'doubletap';
+
+            for (i = 0; i < targets.length; i++) {
+                doubleTap.currentTarget = elements[i];
+                targets[i].fire(doubleTap);
+
+                if (doubleTap.immediatePropagationStopped
+                    ||(doubleTap.propagationStopped && targets[i + 1] !== doubleTap.currentTarget)) {
+                    break;
+                }
+            }
+
+            prevTap = doubleTap;
+        }
+        else {
+            prevTap = tap;
+        }
+    }
+
+    function collectTaps (event) {
+        if (pointerWasMoved
+            || !(event instanceof downEvent.constructor)
+            || downEvent.target !== event.target) {
+            return;
+        }
+
+        var tapTargets = [],
+            tapElements = [];
+
+        var element = event.target;
+
+        while (element) {
+            if (interact.isSet(element)) {
+                tapTargets.push(interact(element));
+                tapElements.push(element);
+            }
+
+            for (var selector in selectors) {
+                var elements = Element.prototype[matchesSelector] === IE8MatchesSelector
+                        ? document.querySelectorAll(selector)
+                        : undefined;
+
+                if (element !== document && element[matchesSelector](selector, elements)) {
+                    tapTargets.push(selectors[selector]);
+                    tapElements.push(element);
+                }
+            }
+
+            element = element.parentNode;
+        }
+
+        if (tapTargets.length) {
+            fireTaps(event, tapTargets, tapElements);
+        }
+    }
 
     // Check if action is enabled globally and the current target supports it
     // If so, return the validated action. Otherwise, return null
@@ -917,9 +1487,9 @@
         var actionType = action.indexOf('resize') !== -1? 'resize': action,
             options = (interactable || target).options;
 
-        if ((  (actionType  === 'resize'   && options.resizeable )
+        if ((  (actionType  === 'resize'   && options.resizable )
             || (action      === 'drag'     && options.draggable  )
-            || (action      === 'gesture'  && options.gestureable))
+            || (action      === 'gesture'  && options.gesturable))
             && actionIsEnabled[actionType]) {
 
             if (action === 'resize' || action === 'resizeyx') {
@@ -931,25 +1501,68 @@
         return null;
     }
 
-    function selectorDown (event, forceAction) {
-        var action;
+    function selectorDown (event) {
+        if (prepared && downEvent && event.type !== downEvent.type) {
+            if (!(/^input$|^textarea$/i.test(target._element.nodeName))) {
+                event.preventDefault();
+            }
+            return;
+        }
+
+        // try to ignore browser simulated mouse after touch
+        if (downEvent
+            && event.type === 'mousedown' && downEvent.type === 'touchstart'
+            && event.timeStamp - downEvent.timeStamp < 300) {
+            return;
+        }
+
+        var element = (event.target instanceof SVGElementInstance
+            ? event.target.correspondingUseElement
+            : event.target),
+            action;
+
+        if (PointerEvent) {
+            addPointer(event);
+        }
+
+        // Check if the down event hits the current inertia target
+        if (inertiaStatus.active && target.selector) {
+            // climb up the DOM tree from the event target
+            while (element && element !== document) {
+
+                // if this element is the current inertia target element
+                if (element === inertiaStatus.targetElement
+                    // and the prospective action is the same as the ongoing one
+                    && validateAction(target.getAction(event)) === prepared) {
+
+                    // stop inertia so that the next move will be a normal one
+                    cancelFrame(inertiaStatus.i);
+                    inertiaStatus.active = false;
+
+                    if (PointerEvent) {
+                        // add the pointer to the gesture object
+                        addPointer(event, selectorGesture);
+                    }
+
+                    return;
+                }
+                element = element.parentNode;
+            }
+        }
 
         // do nothing if interacting
         if (dragging || resizing || gesturing) {
             return;
         }
 
-        if (matches.length && event.type === 'mousedown') {
+        if (matches.length && /mousedown|pointerdown/i.test(event.type)) {
             action = validateSelector(event, matches);
         }
         else {
             var selector,
-                element = (event.target instanceof SVGElementInstance
-                ? event.target.correspondingUseElement
-                : event.target),
                 elements;
 
-            while (element !== document.documentElement && !action) {
+            while (element && element !== document && !action) {
                 matches = [];
 
                 for (selector in selectors) {
@@ -969,56 +1582,64 @@
 
         if (action) {
             pointerIsDown = true;
+            prepared = action;
+
             return pointerDown(event, action);
+        }
+        else {
+            // do these now since pointerDown isn't being called from here
+            downTime = new Date().getTime();
+            downEvent = event;
+            setEventXY(prevCoords, event);
+            pointerWasMoved = false;
         }
     }
 
     // Determine action to be performed on next pointerMove and add appropriate
     // style and event Liseners
     function pointerDown (event, forceAction) {
+        if (!forceAction && pointerIsDown && downEvent && event.type !== downEvent.type) {
+            if (!(/^input$|^textarea$/i.test(target._element.nodeName))) {
+                event.preventDefault();
+            }
+            return;
+        }
+
+        pointerIsDown = true;
+
+        if (PointerEvent) {
+            addPointer(event);
+        }
+
         // If it is the second touch of a multi-touch gesture, keep the target
         // the same if a target was set by the first touch
-        // Otherwise, set the target if the pointer is not down
-        if ((event.touches && event.touches.length < 2 && !target)
-            || !pointerIsDown) {
+        // Otherwise, set the target if there is no action prepared
+        if ((((event.touches && event.touches.length < 2) || (pointerIds && pointerIds.length < 2)) && !target)
+            || !prepared) {
 
-            var getFrom = events.useAttachEvent? event.currentTarget: this;
-
-            target = interactables.get(getFrom);
+            target = interactables.get(event.currentTarget);
         }
 
         var options = target && target.options;
 
         if (target && !(dragging || resizing || gesturing)) {
-            var action = validateAction(forceAction || target.getAction(event)),
-                average,
-                page,
-                client;
+            var action = validateAction(forceAction || target.getAction(event));
 
-            if (event.touches) {
-                average = touchAverage(event);
-                page = {
-                    x: average.pageX,
-                    y: average.pageY
-                };
-                client = {
-                    x: average.clientX,
-                    y: average.clientY
-                };
-            }
-            else {
-                page = getPageXY(event);
-                client = getClientXY(event);
+            setEventXY(startCoords, event);
+
+            if (PointerEvent && event instanceof PointerEvent) {
+                // Dom modification seems to reset the gesture target
+                if (!target._gesture.target) {
+                    target._gesture.target = target._element;
+                }
+
+                addPointer(event, target._gesture);
             }
 
             if (!action) {
                 return event;
             }
 
-            // Register that the pointer is down after succesfully validating
-            // action. This way, a new target can be gotten in the next
-            // downEvent propagation
-            pointerIsDown = true;
             pointerWasMoved = false;
 
             if (options.styleCursor) {
@@ -1033,266 +1654,379 @@
                             'y':
                             '';
 
-            prepared = action;
+            if (action === 'gesture'
+                && ((event.touches && event.touches.length < 2)
+                    || PointerEvent && pointerIds.length < 2)) {
+                        action = null;
+            }
 
-            x0 = page.x - options.origin.x;
-            y0 = page.y - options.origin.y;
-            clientX0 = client.x - options.origin.x;
-            clientY0 = client.y - options.origin.y;
+            prepared = action;
 
             snapStatus.x = null;
             snapStatus.y = null;
 
-            event.preventDefault();
+            downTime = new Date().getTime();
+            downEvent = event;
+            setEventXY(prevCoords, event);
+            pointerWasMoved = false;
+
+            if (!(/^input$|^textarea$/i.test(target._element.nodeName))) {
+                event.preventDefault();
+            }
+        }
+        // if inertia is active try to resume action
+        else if (inertiaStatus.active
+            && event.currentTarget === inertiaStatus.targetElement
+            && target === inertiaStatus.target
+            && validateAction(target.getAction(event)) === prepared) {
+
+            cancelFrame(inertiaStatus.i);
+            inertiaStatus.active = false;
+
+            if (PointerEvent) {
+                if (!target._gesture.target) {
+                    target._gesture.target = target._element;
+                }
+                // add the pointer to the gesture object
+                addPointer(event, target._gesture);
+            }
         }
     }
 
-    function pointerMove (event) {
-        if (pointerIsDown) {
-            if (x0 === prevX && y0 === prevY) {
-                pointerWasMoved = true;
+    function setSnapping (event, status) {
+        var snap = target.options.snap,
+            anchors = snap.anchors,
+            page,
+            closest,
+            range,
+            inRange,
+            snapChanged,
+            dx,
+            dy,
+            distance,
+            i, len;
+
+        status = status || snapStatus;
+
+        if (status.useStatusXY) {
+            page = { x: status.x, y: status.y };
+        }
+        else {
+            var origin = getOriginXY(target);
+
+            page = getPageXY(event);
+
+            page.x -= origin.x;
+            page.y -= origin.y;
+        }
+
+        status.realX = page.x;
+        status.realY = page.y;
+
+        // change to infinite range when range is negative
+        if (snap.range < 0) { snap.range = Infinity; }
+
+        // create an anchor representative for each path's returned point
+        if (snap.mode === 'path') {
+            anchors = [];
+
+            for (i = 0, len = snap.paths.length; i < len; i++) {
+                var path = snap.paths[i];
+
+                if (typeof path === 'function') {
+                    path = path(page.x, page.y);
+                }
+
+                anchors.push({
+                    x: typeof path.x === 'number' ? path.x : page.x,
+                    y: typeof path.y === 'number' ? path.y : page.y,
+
+                    range: typeof path.range === 'number'? path.range: snap.range
+                });
             }
+        }
+
+        if ((snap.mode === 'anchor' || snap.mode === 'path') && anchors.length) {
+            closest = {
+                anchor: null,
+                distance: 0,
+                range: 0,
+                dx: 0,
+                dy: 0
+            };
+
+            for (i = 0, len = anchors.length; i < len; i++) {
+                var anchor = anchors[i];
+
+                range = typeof anchor.range === 'number'? anchor.range: snap.range;
+
+                dx = anchor.x - page.x;
+                dy = anchor.y - page.y;
+                distance = hypot(dx, dy);
+
+                inRange = distance < range;
+
+                // Infinite anchors count as being out of range
+                // compared to non infinite ones that are in range
+                if (range === Infinity && closest.inRange && closest.range !== Infinity) {
+                    inRange = false;
+                }
+
+                if (!closest.anchor || (inRange?
+                    // is the closest anchor in range?
+                    (closest.inRange && range !== Infinity)?
+                        // the pointer is relatively deeper in this anchor
+                        distance / range < closest.distance / closest.range:
+                        //the pointer is closer to this anchor
+                        distance < closest.distance:
+                    // The other is not in range and the pointer is closer to this anchor
+                    (!closest.inRange && distance < closest.distance))) {
+
+                    if (range === Infinity) {
+                        inRange = true;
+                    }
+
+                    closest.anchor = anchor;
+                    closest.distance = distance;
+                    closest.range = range;
+                    closest.inRange = inRange;
+                    closest.dx = dx;
+                    closest.dy = dy;
+
+                    status.range = range;
+                }
+            }
+
+            inRange = closest.inRange;
+            snapChanged = (closest.anchor.x !== status.x || closest.anchor.y !== status.y);
+
+            status.x = closest.anchor.x;
+            status.y = closest.anchor.y;
+            status.dx = closest.dx;
+            status.dy = closest.dy;
+        }
+        else if (snap.mode === 'grid') {
+            var gridx = Math.round((page.x - snap.gridOffset.x) / snap.grid.x),
+                gridy = Math.round((page.y - snap.gridOffset.y) / snap.grid.y),
+
+                newX = gridx * snap.grid.x + snap.gridOffset.x,
+                newY = gridy * snap.grid.y + snap.gridOffset.y;
+
+            dx = newX - page.x;
+            dy = newY - page.y;
+
+            distance = hypot(dx, dy);
+
+            inRange = distance < snap.range;
+            snapChanged = (newX !== status.x || newY !== status.y);
+
+            status.x = newX;
+            status.y = newY;
+            status.dx = dx;
+            status.dy = dy;
+
+            status.range = snap.range;
+        }
+
+        status.changed = (snapChanged || (inRange && !status.locked));
+        status.locked = inRange;
+
+        return status;
+    }
+
+    function setRestriction (event, status) {
+        var action = interact.currentAction() || prepared,
+            restriction = target && target.options.restrict[action],
+            page;
+
+        status = status || restrictStatus;
+
+        page = status.useStatusXY
+                ? page = { x: status.x, y: status.y }
+                : page = getPageXY(event);
+
+        if (status.snap && status.snap.locked) {
+            page.x += status.snap.dx || 0;
+            page.y += status.snap.dy || 0;
+        }
+
+        status.dx = 0;
+        status.dy = 0;
+        status.restricted = false;
+
+        if (!action || !restriction) {
+            return status;
+        }
+
+        var rect;
+
+        if (restriction === 'parent') {
+            restriction = target._element.parentNode;
+        }
+        else if (restriction === 'self') {
+            restriction = target._element;
+        }
+
+        if (isElement(restriction)) {
+            rect = getElementRect(restriction);
+        }
+        else {
+            if (typeof restriction === 'function') {
+                restriction = restriction(page.x, page.y, target._element);
+            }
+
+            rect = restriction;
+
+            // object is assumed to have
+            // x, y, width, height or
+            // left, top, right, bottom
+            if ('x' in restriction && 'y' in restriction) {
+                rect = {
+                    left  : restriction.x,
+                    top   : restriction.y,
+                    right : restriction.x + restriction.width,
+                    bottom: restriction.y + restriction.height
+                };
+            }
+        }
+
+        status.dx = Math.max(Math.min(rect.right , page.x), rect.left) - page.x;
+        status.dy = Math.max(Math.min(rect.bottom, page.y), rect.top ) - page.y;
+        status.restricted = true;
+
+        return status;
+    }
+
+    function pointerMove (event, preEnd) {
+        if (!pointerIsDown) { return; }
+
+        if (!(event instanceof InteractEvent)) {
+            setEventXY(curCoords, event);
+        }
+
+        // register movement of more than 1 pixel
+        if (!pointerWasMoved) {
+            var dx = curCoords.clientX - prevCoords.clientX,
+                dy = curCoords.clientY - prevCoords.clientY;
+
+            pointerWasMoved = hypot(dx, dy) > 1;
+        }
+
+        // return if there is no prepared action
+        if (!prepared
+            // or this is a mousemove event but the down event was a touch
+            || (event.type === 'mousemove' && downEvent.type === 'touchstart')) {
+
+            return;
+        }
+
+        if (pointerWasMoved
+            // ignore movement while inertia is active
+            && (!inertiaStatus.active || (event instanceof InteractEvent && /inertiastart/.test(event.type)))) {
+
+            // if just starting an action, calculate the pointer speed now
+            if (!(dragging || resizing || gesturing)) {
+                setEventDeltas(pointerDelta, prevCoords, curCoords);
+            }
+
             if (prepared && target) {
-                if (target.options.snapEnabled) {
-                    var snap = target.options.snap,
-                        page = getPageXY(event),
-                        closest,
-                        range,
-                        inRange,
-                        snapChanged,
-                        distX,
-                        distY,
-                        distance,
-                        i, len;
+                var shouldRestrict = target.options.restrictEnabled && (!target.options.restrict.endOnly || preEnd),
+                    starting = !(dragging || resizing || gesturing),
+                    snapEvent = starting? downEvent: event;
 
-                    snapStatus.realX = page.x;
-                    snapStatus.realY = page.y;
+                if (starting) {
+                    prevEvent = downEvent;
+                }
 
-                    page.x -= target.options.origin.x;
-                    page.y -= target.options.origin.y;
+                if (!shouldRestrict) {
+                    restrictStatus.restricted = false;
+                }
 
-                    // change to infinite range when range is negative
-                    if (snap.range < 0) { snap.range = Infinity; }
+                // check for snap
+                if (target.options.snapEnabled
+                    && target.options.snap.actions.indexOf(prepared) !== -1
+                    && (!target.options.snap.endOnly || preEnd)) {
 
-                    if (snap.mode === 'anchor' && snap.anchors.length) {
-                        closest = {
-                            anchor: null,
-                            distance: 0,
-                            range: 0,
-                            distX: 0,
-                            distY: 0
-                        };
+                    setSnapping(snapEvent);
 
-                        for (i = 0, len = snap.anchors.length; i < len; i++) {
-                            var anchor = snap.anchors[i];
+                    // move if snapping doesn't prevent it or a restriction is in place
+                    if ((snapStatus.changed || !snapStatus.locked) || shouldRestrict) {
 
-                            range = typeof anchor.range === 'number'? anchor.range: snap.range;
-
-                            distX = anchor.x - page.x;
-                            distY = anchor.y - page.y;
-                            distance = Math.sqrt(distX * distX + distY * distY);
-
-                            inRange = distance < range;
-
-                            // Infinite anchors count as being out of range
-                            // compared to non infinite ones that are in range
-                            if (range === Infinity && closest.inRange && closest.range !== Infinity) {
-                                inRange = false;
-                            }
-
-                            if (!closest.anchor || (inRange?
-                                // is the closest anchor in range?
-                                (closest.inRange && range !== Infinity)?
-                                    // the pointer is relatively deeper in this anchor
-                                    distance / range < closest.distance / closest.range:
-                                    //the pointer is closer to this anchor
-                                    distance < closest.distance:
-                                // The other is not in range and the pointer is closer to this anchor
-                                (!closest.inRange && distance < closest.distance))) {
-
-                                if (range === Infinity) {
-                                    inRange = true;
-                                }
-
-                                closest.anchor = anchor;
-                                closest.distance = distance;
-                                closest.range = range;
-                                closest.inRange = inRange;
-                                closest.distX = distX;
-                                closest.distY = distY;
-
-                                snapStatus.range = range;
-                            }
+                        if (shouldRestrict) {
+                            setRestriction(event);
                         }
 
-                        inRange = closest.inRange;
-                        snapChanged = (closest.anchor.x !== snapStatus.x || closest.anchor.y !== snapStatus.y);
-
-                        snapStatus.x = closest.anchor.x;
-                        snapStatus.y = closest.anchor.y;
-                        snapStatus.dx = closest.distX;
-                        snapStatus.dy = closest.distY;
-                        target.options.snap.anchors.closest = snapStatus.anchors.closest = closest.anchor;
-                    }
-                    else if (snap.mode === 'grid') {
-                        var gridx = Math.round((page.x - snap.gridOffset.x) / snap.grid.x),
-                            gridy = Math.round((page.y - snap.gridOffset.y) / snap.grid.y),
-
-                            newX = gridx * snap.grid.x + snap.gridOffset.x,
-                            newY = gridy * snap.grid.y + snap.gridOffset.y;
-
-                        distX = newX - page.x;
-                        distY = newY - page.y;
-
-                        distance = Math.sqrt(distX * distX + distY * distY);
-
-                        inRange = distance < snap.range;
-                        snapChanged = (newX !== snapStatus.x || newY !== snapStatus.y);
-
-                        snapStatus.x = newX;
-                        snapStatus.y = newY;
-                        snapStatus.dx = distX;
-                        snapStatus.dy = distY;
-
-                        snapStatus.range = snap.range;
-                    }
-                    if (snap.mode === 'path' && snap.paths.length) {
-                        closest = {
-                            path: {},
-                            distX: 0,
-                            distY: 0,
-                            range: 0
-                        };
-
-                        for (i = 0, len = snap.paths.length; i < len; i++) {
-                            var path = snap.paths[i],
-                                snapToX = false,
-                                snapToY = false,
-                                pathXY = path,
-                                pathX,
-                                pathY;
-
-                            if (typeof path === 'function') {
-                                pathXY = path(page.x, page.y);
-                            }
-
-                            if (typeof pathXY.x === 'number') {
-                                pathX = pathXY.x;
-                                snapToX = true;
-                            }
-                            else {
-                                pathX = page.x;
-                            }
-
-                            if (typeof pathXY.y === 'number') {
-                                pathY = pathXY.y;
-                                snapToY = true;
-                            }
-                            else {
-                                pathY = page.y;
-                            }
-
-                            range = typeof pathXY.range === 'number'? pathXY.range: snap.range;
-
-                            distX = pathX - page.x;
-                            distY = pathY - page.y;
-
-                            var xInRange = Math.abs(distX) < range && snapToX,
-                                yInRange = Math.abs(distY) < range && snapToY;
-
-                            // Infinite paths count as being out of range
-                            // compared to non infinite ones that are in range
-                            if (range === Infinity && closest.xInRange && closest.range !== Infinity) {
-                                xInRange = false;
-                            }
-
-                            if (!('x' in closest.path) || (xInRange
-                                // is the closest path in range?
-                                ? (closest.xInRange && range !== Infinity)
-                                    // the pointer is relatively deeper in this path
-                                    ? distance / range < closest.distX / closest.range
-                                    //the pointer is closer to this path
-                                    : Math.abs(distX) < Math.abs(closest.distX)
-                                // The other is not in range and the pointer is closer to this path
-                                : (!closest.xInRange && Math.abs(distX) < Math.abs(closest.distX)))) {
-
-                                if (range === Infinity) {
-                                    xInRange = true;
-                                }
-
-                                closest.path.x   = pathX;
-                                closest.distX    = distX;
-                                closest.xInRange = xInRange;
-                                closest.range    = range;
-
-                                snapStatus.range = range;
-                            }
-
-                            // Infinite paths count as being out of range
-                            // compared to non infinite ones that are in range
-                            if (range === Infinity && closest.yInRange && closest.range !== Infinity) {
-                                yInRange = false;
-                            }
-                            if (!('y' in closest.path) || (yInRange
-                                // is the closest path in range?
-                                ? (closest.yInRange && range !== Infinity)
-                                    // the pointer is relatively deeper in this path
-                                    ? distance / range < closest.distY / closest.range
-                                    //the pointer is closer to this path
-                                    : Math.abs(distY) < Math.abs(closest.distY)
-                                // The other is not in range and the pointer is closer to this path
-                                : (!closest.yInRange && Math.abs(distY) < Math.abs(closest.distY)))) {
-
-                                if (range === Infinity) {
-                                    yInRange = true;
-                                }
-
-                                closest.path.y   = pathY;
-                                closest.distY    = distY;
-                                closest.yInRange = yInRange;
-                                closest.range    = range;
-
-                                snapStatus.range = range;
-                            }
-                        }
-
-                        inRange = closest.xInRange || closest.yInRange;
-
-                        if (closest.xInRange && closest.yInRange && (!snapStatus.xInRange || !snapStatus.yInRange)) {
-                            snapChanged = true;
-                        }
-                        else {
-                            snapChanged = (!closest.xInRange || !closest.yInRange || closest.path.x !== snapStatus.x || closest.path.y !== snapStatus.y);
-                        }
-
-                        snapStatus.x = closest.path.x;
-                        snapStatus.y = closest.path.y;
-                        snapStatus.dx = closest.distX;
-                        snapStatus.dy = closest.distY;
-
-                        snapStatus.xInRange = closest.xInRange;
-                        snapStatus.yInRange = closest.yInRange;
-
-                        target.options.snap.paths.closest = snapStatus.paths.closest = closest.path;
-                    }
-
-                    if ((snapChanged || !snapStatus.locked) && inRange)  {
-                        snapStatus.locked = true;
-                        actions[prepared].moveListener(event);
-                    }
-                    else if (snapChanged || !inRange) {
-                        snapStatus.locked = false;
                         actions[prepared].moveListener(event);
                     }
                 }
+                // if no snap, always move
                 else {
+                    if (shouldRestrict) {
+                        setRestriction(event);
+                    }
+
                     actions[prepared].moveListener(event);
                 }
             }
         }
 
+        if (!(event instanceof InteractEvent)) {
+            // set pointer coordinate, time changes and speeds
+            setEventDeltas(pointerDelta, prevCoords, curCoords);
+            setEventXY(prevCoords, event);
+        }
+
         if (dragging || resizing) {
             autoScroll.edgeMove(event);
+        }
+    }
+
+    function addPointer (event, gesture) {
+        // dont add the event if it's not the same pointer type as the previous event
+        if (pointerMoves.length && pointerMoves[0].pointerType !== event.pointerType) {
+            return;
+        }
+
+        if (gesture) {
+            gesture.addPointer(event.pointerId);
+        }
+
+        var index = pointerIds.indexOf(event.pointerId);
+
+        if (index === -1) {
+            pointerIds.push(event.pointerId);
+            pointerMoves.push(event);
+        }
+        else {
+            pointerMoves[index] = event;
+        }
+    }
+
+    function removePointer (event) {
+        var index = pointerIds.indexOf(event.pointerId);
+
+        if (index === -1) { return; }
+
+        pointerIds.splice(index, 1);
+        pointerMoves.splice(index, 1);
+    }
+
+    function recordPointers (event) {
+        var index = pointerIds.indexOf(event.pointerId);
+
+        if (index === -1) { return; }
+
+        if (/move/i.test(event.type)) {
+            pointerMoves[index] = event;
+        }
+        else if (/up|cancel/i.test(event.type)) {
+            removePointer(event);
+
+            // End the gesture InteractEvent if there are
+            // fewer than 2 active pointers
+            if (gesturing && pointerIds.length < 2) {
+                target._gesture.stop();
+            }
         }
     }
 
@@ -1306,8 +2040,10 @@
             leaveDropTarget;
 
         if (!dragging) {
-            dragEvent = new InteractEvent(event, 'drag', 'start');
+            dragEvent = new InteractEvent(downEvent, 'drag', 'start');
             dragging = true;
+
+            target.fire(dragEvent);
 
             if (!dynamicDrop) {
                 calcRects(dropzones);
@@ -1315,34 +2051,48 @@
                     selectorDZs[i]._elements = document.querySelectorAll(selectorDZs[i].selector);
                 }
             }
+
+            prevEvent = dragEvent;
+
+            // set snapping for the next move event
+            if (target.options.snapEnabled && !target.options.snap.endOnly) {
+                setSnapping(event);
+            }
+        }
+
+        dragEvent  = new InteractEvent(event, 'drag', 'move');
+
+        var draggableElement = target._element,
+            drop = getDrop(dragEvent, draggableElement);
+
+        if (drop) {
+            dropTarget = drop.dropzone;
+            dropElement = drop.element;
         }
         else {
-            var draggableElement = target._element,
-                dropzoneElement  = dropTarget? dropTarget._element: null;
+            dropTarget = dropElement = null;
+        }
 
-            dragEvent  = new InteractEvent(event, 'drag', 'move');
-            dropTarget = getDrop(event, target);
+        // Make sure that the target selector draggable's element is
+        // restored after dropChecks
+        target._element = draggableElement;
 
-            // Make sure that the target selector draggable's element is
-            // restored after dropChecks
-            target._element = draggableElement;
+        if (dropElement !== prevDropElement) {
+            // if there was a prevDropTarget, create a dragleave event
+            if (prevDropTarget) {
+                dragLeaveEvent = new InteractEvent(event, 'drag', 'leave', prevDropElement, draggableElement);
 
-            if (dropTarget !== prevDropTarget) {
-                // if there was a prevDropTarget, create a dragleave event
-                if (prevDropTarget) {
-                    dragLeaveEvent      = new InteractEvent(event, 'drag', 'leave', dropzoneElement, draggableElement);
+                dragEvent.dragLeave = prevDropElement;
+                leaveDropTarget = prevDropTarget;
+                prevDropTarget = prevDropElement = null;
+            }
+            // if the dropTarget is not null, create a dragenter event
+            if (dropTarget) {
+                dragEnterEvent      = new InteractEvent(event, 'drag', 'enter', dropElement, draggableElement);
 
-                    dragEvent.dragLeave = prevDropTarget._element;
-                    leaveDropTarget     = prevDropTarget;
-                    prevDropTarget      = null;
-                }
-                // if the dropTarget is not null, create a dragenter event
-                if (dropTarget) {
-                    dragEnterEvent      = new InteractEvent(event, 'drag', 'enter', dropzoneElement, draggableElement);
-
-                    dragEvent.dragEnter = dropTarget._element;
-                    prevDropTarget      = dropTarget;
-                }
+                dragEvent.dragEnter = dropTarget._element;
+                prevDropTarget      = dropTarget;
+                prevDropElement     = prevDropTarget._element;
             }
         }
 
@@ -1355,7 +2105,7 @@
             dropTarget.fire(dragEnterEvent);
         }
 
-        setPrevXY(dragEvent);
+        prevEvent = dragEvent;
     }
 
     function resizeMove (event) {
@@ -1364,21 +2114,28 @@
         var resizeEvent;
 
         if (!resizing) {
-            resizeEvent = new InteractEvent(event, 'resize', 'start');
+            resizeEvent = new InteractEvent(downEvent, 'resize', 'start');
             target.fire(resizeEvent);
 
+            target.fire(resizeEvent);
             resizing = true;
-        }
-        else {
-            resizeEvent = new InteractEvent(event, 'resize', 'move');
-            target.fire(resizeEvent);
+
+            prevEvent = resizeEvent;
+
+            // set snapping for the next move event
+            if (target.options.snapEnabled && !target.options.snap.endOnly) {
+                setSnapping(event);
+            }
         }
 
-        setPrevXY(resizeEvent);
+        resizeEvent = new InteractEvent(event, 'resize', 'move');
+        target.fire(resizeEvent);
+
+        prevEvent = resizeEvent;
     }
 
     function gestureMove (event) {
-        if (!event.touches || event.touches.length < 2) {
+        if ((!event.touches || event.touches.length < 2) && !PointerEvent) {
             return;
         }
 
@@ -1387,29 +2144,35 @@
         var gestureEvent;
 
         if (!gesturing) {
-
-            gestureEvent = new InteractEvent(event, 'gesture', 'start');
+            gestureEvent = new InteractEvent(downEvent, 'gesture', 'start');
             gestureEvent.ds = 0;
 
-            gesture.startDistance = gestureEvent.distance;
-            gesture.startAngle = gestureEvent.angle;
+            gesture.startDistance = gesture.prevDistance = gestureEvent.distance;
+            gesture.startAngle = gesture.prevAngle = gestureEvent.angle;
             gesture.scale = 1;
 
-            target.fire(gestureEvent);
-
             gesturing = true;
-        }
-        else {
-            gestureEvent = new InteractEvent(event, 'gesture', 'move');
-            gestureEvent.ds = gestureEvent.scale - gesture.scale;
 
             target.fire(gestureEvent);
+
+            prevEvent = gestureEvent;
+
+            // set snapping for the next move event
+            if (target.options.snapEnabled && !target.options.snap.endOnly) {
+                setSnapping(event);
+            }
         }
 
-        setPrevXY(gestureEvent);
+        gestureEvent = new InteractEvent(event, 'gesture', 'move');
+        gestureEvent.ds = gestureEvent.scale - gesture.scale;
+
+        target.fire(gestureEvent);
+
+        prevEvent = gestureEvent;
 
         gesture.prevAngle = gestureEvent.angle;
         gesture.prevDistance = gestureEvent.distance;
+
         if (gestureEvent.scale !== Infinity &&
             gestureEvent.scale !== null &&
             gestureEvent.scale !== undefined  &&
@@ -1452,12 +2215,16 @@
         }
 
         var elementInteractable = interactables.get(eventTarget),
-            action = elementInteractable
+            elementAction = elementInteractable
                      && validateAction(
-                         elementInteractable.getAction(event, elementInteractable),
+                         elementInteractable.getAction(event),
                          elementInteractable);
 
-        if (!elementInteractable || !validateAction(elementInteractable.getAction(event), elementInteractable)) {
+        if (elementAction) {
+            target = elementInteractable;
+            matches = [];
+        }
+        else {
             if (validateSelector(event, curMatches)) {
                 matches = curMatches;
 
@@ -1486,6 +2253,8 @@
     }
 
     function pointerOut (event) {
+        if (pointerIsDown || dragging || resizing || gesturing) { return; }
+
         // Remove temporary event listeners for selector Interactables
         var eventTarget = (event.target instanceof SVGElementInstance
             ? event.target.correspondingUseElement
@@ -1523,17 +2292,145 @@
                 }
             }
         }
-        else {
+        else if (prepared) {
             event.preventDefault();
         }
     }
 
-    // End interact move events and stop auto-scroll
-    function docPointerUp (event) {
-        var endEvent;
+    // End interact move events and stop auto-scroll unless inertia is enabled
+    function pointerUp (event) {
+        // don't return if the event is an InteractEvent (in the case of inertia end)
+        // or if the browser uses PointerEvents (event would always be a gestureend)
+        if (!(event instanceof InteractEvent || PointerEvent)
+            && pointerIsDown && downEvent
+            && !(event instanceof downEvent.constructor)) {
+
+            return;
+        }
 
         if (event.touches && event.touches.length >= 2) {
             return;
+        }
+
+        // Stop native GestureEvent inertia
+        if (GestureEvent && (event instanceof GestureEvent) && /inertiastart/i.test(event.type)) {
+            event.gestureObject.stop();
+            return;
+        }
+
+        var endEvent,
+            inertiaOptions = target && target.options.inertia,
+            prop;
+
+        if (dragging || resizing || gesturing) {
+
+            if (inertiaStatus.active) { return; }
+
+            var deltaSource =target.options.deltaSource,
+                pointerSpeed = pointerDelta[deltaSource + 'Speed'];
+
+            // check if inertia should be started
+            if (target.options.inertiaEnabled
+                && prepared !== 'gesture'
+                && inertiaOptions.actions.indexOf(prepared) !== -1
+                && event !== inertiaStatus.startEvent
+                && (new Date().getTime() - curCoords.timeStamp) < 50
+                && pointerSpeed > inertiaOptions.minSpeed
+                && pointerSpeed > inertiaOptions.endSpeed) {
+
+
+                var lambda = inertiaOptions.resistance,
+                    inertiaDur = -Math.log(inertiaOptions.endSpeed / pointerSpeed) / lambda,
+                    startEvent;
+
+                inertiaStatus.active = true;
+                inertiaStatus.target = target;
+                inertiaStatus.targetElement = target._element;
+
+                if (events.useAttachEvent) {
+                    // make a copy of the pointerdown event because IE8
+                    // http://stackoverflow.com/a/3533725/2280888
+                    for (prop in event) {
+                        if (event.hasOwnProperty(prop)) {
+                            inertiaStatus.pointerUp[prop] = event[prop];
+                        }
+                    }
+                }
+                else {
+                    inertiaStatus.pointerUp = event;
+                }
+
+                inertiaStatus.startEvent = startEvent = new InteractEvent(event, 'drag', 'inertiastart');
+
+                inertiaStatus.vx0 = pointerDelta[deltaSource + 'VX'];
+                inertiaStatus.vy0 = pointerDelta[deltaSource + 'VY'];
+                inertiaStatus.v0 = pointerSpeed;
+                inertiaStatus.x0 = prevEvent.pageX;
+                inertiaStatus.y0 = prevEvent.pageY;
+                inertiaStatus.t0 = startEvent.timeStamp / 1000;
+                inertiaStatus.sx = inertiaStatus.sy = 0;
+
+                inertiaStatus.modifiedXe = inertiaStatus.xe = (inertiaStatus.vx0 - inertiaDur) / lambda;
+                inertiaStatus.modifiedYe = inertiaStatus.ye = (inertiaStatus.vy0 - inertiaDur) / lambda;
+                inertiaStatus.te = inertiaDur;
+
+                inertiaStatus.lambda_v0 = lambda / inertiaStatus.v0;
+                inertiaStatus.one_ve_v0 = 1 - inertiaOptions.endSpeed / inertiaStatus.v0;
+
+                var startX = startEvent.pageX,
+                    startY = startEvent.pageY,
+                    statusObject;
+
+                if (startEvent.snap && startEvent.snap.locked) {
+                    startX -= startEvent.snap.dx;
+                    startY -= startEvent.snap.dy;
+                }
+
+                if (startEvent.restrict) {
+                    startX -= startEvent.restrict.dx;
+                    startY -= startEvent.restrict.dy;
+                }
+
+                statusObject = {
+                    useStatusXY: true,
+                    x: startX + inertiaStatus.xe,
+                    y: startY + inertiaStatus.ye,
+                    dx: 0,
+                    dy: 0,
+                    snap: null
+                };
+
+                statusObject.snap = statusObject;
+
+                if (target.options.snapEnabled && target.options.snap.endOnly) {
+                    var snap = setSnapping(startEvent, statusObject);
+
+                    if (snap.locked) {
+                        inertiaStatus.modifiedXe += snap.dx;
+                        inertiaStatus.modifiedYe += snap.dy;
+                    }
+                }
+
+                if (target.options.restrictEnabled && target.options.restrict.endOnly) {
+                    var restrict = setRestriction(event, statusObject);
+
+                    inertiaStatus.modifiedXe += restrict.dx;
+                    inertiaStatus.modifiedYe += restrict.dy;
+                }
+
+                cancelFrame(inertiaStatus.i);
+                inertiaStatus.i = reqFrame(inertiaFrame);
+
+                target.fire(inertiaStatus.startEvent);
+
+                return;
+            }
+
+            if ((target.options.snapEnabled && target.options.snap.endOnly)
+                || (target.options.restrictEnabled && target.options.restrict.endOnly)) {
+                // fire a move event at the snapped coordinates
+                pointerMove(event, true);
+            }
         }
 
         if (dragging) {
@@ -1541,31 +2438,40 @@
 
             var dropEvent,
                 draggableElement = target._element,
-                drop = getDrop(event, target),
-                dropzoneElement = drop? drop._element: null;
+                drop = getDrop(endEvent, draggableElement);
+
+            if (drop) {
+                dropTarget = drop.dropzone;
+                dropElement = drop.element;
+            }
+            else {
+                dropTarget = null;
+                dropElement = null;
+            }
 
             // getDrop changes target._element
             target._element = draggableElement;
 
             // get the most apprpriate dropzone based on DOM depth and order
-            if (drop) {
-                dropEvent = new InteractEvent(event, 'drop', null, dropzoneElement, draggableElement);
+            if (dropTarget) {
+                dropEvent = new InteractEvent(event, 'drop', null, dropElement, draggableElement);
 
-                endEvent.dropzone = dropzoneElement;
+                endEvent.dropzone = dropElement;
             }
 
             // if there was a prevDropTarget (perhaps if for some reason this
             // dragend happens without the mouse moving of the previous drop
             // target)
             else if (prevDropTarget) {
-                var dragLeaveEvent = new InteractEvent(event, 'drag', 'leave', dropzoneElement, draggableElement);
+                var dragLeaveEvent = new InteractEvent(event, 'drag', 'leave', dropElement, draggableElement);
 
                 prevDropTarget.fire(dragLeaveEvent, draggableElement);
 
-                endEvent.dragLeave = prevDropTarget._element;
+                endEvent.dragLeave = prevDropElement;
             }
 
             target.fire(endEvent);
+
             if (dropEvent) {
                 dropTarget.fire(dropEvent);
             }
@@ -1576,24 +2482,61 @@
         }
         else if (gesturing) {
             endEvent = new InteractEvent(event, 'gesture', 'end');
-            endEvent.ds = endEvent.scale;
             target.fire(endEvent);
-        }
-        else if ((event.type === 'mouseup' || event.type === 'touchend') && target && pointerIsDown && !pointerWasMoved) {
-            var click = {};
-
-            for (var prop in event) {
-                if (event.hasOwnProperty(prop)) {
-                    click[prop] = event[prop];
-                }
-            }
-            click.type = 'tap';
-            target.fire(click);
         }
 
         interact.stop();
+    }
 
-        return event;
+    // bound to document when a listener is added to a selector interactable
+    function delegateListener (event, useCapture) {
+        var fakeEvent = {},
+            selectors = delegatedEvents[event.type],
+            selector,
+            element = event.target,
+            i;
+
+        useCapture = useCapture? true: false;
+
+        // duplicate the event so that currentTarget can be changed
+        for (var prop in event) {
+            fakeEvent[prop] = event[prop];
+        }
+
+        fakeEvent.preventDefault = function () {
+            event.preventDefault();
+        };
+
+        // climb up document tree looking for selector matches
+        while (element && element !== document) {
+            for (selector in selectors) {
+                if (element[matchesSelector](selector)) {
+                    var listeners = selectors[selector];
+
+                    fakeEvent.currentTarget = element;
+
+                    for (i = 0; i < listeners.length; i++) {
+                        if (listeners[i][1] !== useCapture) { continue; }
+
+                        try {
+                            listeners[i][0](fakeEvent);
+                        }
+                        catch (error) {
+                            console.error('Error thrown from delegated listener: ' +
+                                          '"' + selector + '" ' + event.type + ' ' +
+                                          (listeners[i][0].name? listeners[i][0].name: ''));
+                            console.log(error);
+                        }
+                    }
+                }
+            }
+
+            element = element.parentNode;
+        }
+    }
+
+    function delegateUseCapture (event) {
+        return delegateListener.call(this, event, true);
     }
 
     interactables.indexOfElement = dropzones.indexOfElement = function indexOfElement (element) {
@@ -1621,11 +2564,11 @@
     };
 
     function clearTargets () {
-        if (!target.selector) {
+        if (target && !target.selector) {
             target = null;
         }
 
-        dropTarget = prevDropTarget = null;
+        dropTarget = dropElement = prevDropTarget = prevDropElement = null;
     }
 
     /*\
@@ -1647,7 +2590,7 @@
      |
      | var rectables = interact('rect');
      | rectables
-     |     .gestureable(true)
+     |     .gesturable(true)
      |     .on('gesturemove', function (event) {
      |         // something cool...
      |     })
@@ -1685,13 +2628,23 @@
             document.querySelector(element);
             selectors[element] = this;
             this.selector = element;
+            this._gesture = selectorGesture;
         }
         else {
-            if(element instanceof Element) {
-                events.add(this, 'mousemove' , pointerHover);
-                events.add(this, 'mousedown' , pointerDown );
-                events.add(this, 'touchmove' , pointerHover);
-                events.add(this, 'touchstart', pointerDown );
+            if(isElement(element)) {
+                if (PointerEvent) {
+                    events.add(this, 'pointerdown', pointerDown );
+                    events.add(this, 'pointermove', pointerHover);
+
+                    this._gesture = new Gesture();
+                    this._gesture.target = element;
+                }
+                else {
+                    events.add(this, 'mousedown' , pointerDown );
+                    events.add(this, 'mousemove' , pointerHover);
+                    events.add(this, 'touchstart', pointerDown );
+                    events.add(this, 'touchmove' , pointerHover);
+                }
             }
 
             elements.push(this);
@@ -1704,15 +2657,32 @@
 
     Interactable.prototype = {
         setOnEvents: function (action, phases) {
-            var start = phases.onstart || phases.onStart,
-                move  = phases.onmove  || phases.onMove,
-                end   = phases.onend   || phases.onEnd;
+            if (action === 'drop') {
+                var drop      = phases.ondrop      || phases.onDrop      || phases.drop,
+                    dragenter = phases.ondragenter || phases.onDropEnter || phases.dragenter,
+                    dragleave = phases.ondragleave || phases.onDropLeave || phases.dragleave;
 
-            action = 'on' + action;
+                if (typeof drop      === 'function') { this.ondrop      = drop     ; }
+                if (typeof dragenter === 'function') { this.ondragenter = dragenter; }
+                if (typeof dragleave === 'function') { this.ondragleave = dragleave; }
+            }
+            else {
+                var start     = phases.onstart     || phases.onStart     || phases.start,
+                    move      = phases.onmove      || phases.onMove      || phases.move,
+                    end       = phases.onend       || phases.onEnd       || phases.end;
 
-            if (typeof start === 'function') { this[action + 'start'] = start; }
-            if (typeof move  === 'function') { this[action + 'move' ] = move ; }
-            if (typeof end   === 'function') { this[action + 'end'  ] = end  ; }
+                var inertiastart = phases.oninertiastart || phases.onInertiaStart || phases.inertiastart;
+
+                action = 'on' + action;
+
+                if (typeof start === 'function') { this[action + 'start'] = start; }
+                if (typeof move  === 'function') { this[action + 'move' ] = move ; }
+                if (typeof end   === 'function') { this[action + 'end'  ] = end  ; }
+
+                if (typeof inertiastart === 'function') { this[action + 'inertiastart'  ] = inertiastart  ; }
+            }
+
+            return this;
         },
 
         /*\
@@ -1768,10 +2738,10 @@
         \*/
         dropzone: function (options) {
             if (options instanceof Object) {
-                var ondrop = options.ondrop || options.onDrop;
-                if (typeof ondrop === 'function') { this.ondrop = ondrop; }
-
                 this.options.dropzone = true;
+                this.setOnEvents('drop', options);
+                this.accept(options.accept);
+
                 (this.selector? selectorDZs: dropzones).push(this);
 
                 if (!dynamicDrop && !this.selector) {
@@ -1821,14 +2791,23 @@
          - event (MouseEvent | TouchEvent) The event that ends a drag
          = (boolean) whether the pointer was over this Interactable
         \*/
-        dropCheck: function (event) {
+        dropCheck: function (event, draggable, element) {
             var page = getPageXY(event),
+                origin = getOriginXY(draggable, element),
                 horizontal,
                 vertical;
+
+            page.x += origin.x;
+            page.y += origin.y;
 
             if (dynamicDrop) {
                 this.rect = this.getRect();
             }
+
+            if (!this.rect) {
+                return false;
+            }
+
             horizontal = (page.x > this.rect.left) && (page.x < this.rect.right);
             vertical   = (page.y > this.rect.top ) && (page.y < this.rect.bottom);
 
@@ -1859,37 +2838,78 @@
         },
 
         /*\
-         * Interactable.resizeable
+         * Interactable.accept
+         [ method ]
+         *
+         * Gets or sets the Element or CSS selector match that this
+         * Interactable accepts if it is a dropzone.
+         *
+         - newValue (Element | string | null) #optional
+         * If it is an Element, then only that element can be dropped into this dropzone.
+         * If it is a string, the element being dragged must match it as a selector.
+         * If it is null, the accept options is cleared - it accepts any element.
+         *
+         = (string | Element | null | Interactable) The current accept option if given `undefined` or this Interactable
+        \*/
+        accept: function (newValue) {
+            if (isElement(newValue)) {
+                this.options.accept = newValue;
+
+                return this;
+            }
+
+            if (typeof newValue === 'string') {
+                // test if it is a valid CSS selector
+                document.querySelector(newValue);
+                this.options.accept = newValue;
+
+                return this;
+            }
+
+            if (newValue === null) {
+                delete this.options.accept;
+
+                return this;
+            }
+
+            return this.options.accept;
+        },
+
+        /*\
+         * Interactable.resizable
          [ method ]
          *
          * Gets or sets whether resize actions can be performed on the
          * Interactable
          *
          = (boolean) Indicates if this can be the target of resize elements
-         | var isResizeable = interact('input[type=text]').resizeable();
+         | var isResizeable = interact('input[type=text]').resizable();
          * or
-         - options (boolean | object) #optional true/false or An object with event listeners to be fired on resize events (object makes the Interactable resizeable)
+         - options (boolean | object) #optional true/false or An object with event listeners to be fired on resize events (object makes the Interactable resizable)
          = (object) This Interactable
-         | interact(element).resizeable({
+         | interact(element).resizable({
          |     onstart: function (event) {},
          |     onmove : function (event) {},
          |     onend  : function (event) {}
          | });
         \*/
-        resizeable: function (options) {
+        resizable: function (options) {
             if (options instanceof Object) {
-                this.options.resizeable = true;
+                this.options.resizable = true;
                 this.setOnEvents('resize', options);
 
                 return this;
             }
             if (typeof options === 'boolean') {
-                this.options.resizeable = options;
+                this.options.resizable = options;
 
                 return this;
             }
-            return this.options.resizeable;
+            return this.options.resizable;
         },
+
+        // misspelled alias
+        resizeable: blank,
 
         /*\
          * Interactable.squareResize
@@ -1921,43 +2941,46 @@
         },
 
         /*\
-         * Interactable.gestureable
+         * Interactable.gesturable
          [ method ]
          *
          * Gets or sets whether multitouch gestures can be performed on the
          * Interactable's element
          *
          = (boolean) Indicates if this can be the target of gesture events
-         | var isGestureable = interact(element).gestureable();
+         | var isGestureable = interact(element).gesturable();
          * or
-         - options (boolean | object) #optional true/false or An object with event listeners to be fired on gesture events (makes the Interactable gestureable)
+         - options (boolean | object) #optional true/false or An object with event listeners to be fired on gesture events (makes the Interactable gesturable)
          = (object) this Interactable
-         | interact(element).gestureable({
+         | interact(element).gesturable({
          |     onmove: function (event) {}
          | });
         \*/
-        gestureable: function (options) {
+        gesturable: function (options) {
             if (options instanceof Object) {
-                this.options.gestureable = true;
+                this.options.gesturable = true;
                 this.setOnEvents('gesture', options);
 
                 return this;
             }
 
             if (typeof options === 'boolean') {
-                this.options.gestureable = options;
+                this.options.gesturable = options;
 
                 return this;
             }
 
             if (options === null) {
-                delete this.options.gestureable;
+                delete this.options.gesturable;
 
                 return this;
             }
 
-            return this.options.gestureable;
+            return this.options.gesturable;
         },
+
+        // misspelled alias
+        gestureable: blank,
 
         /*\
          * Interactable.autoScroll
@@ -1990,14 +3013,18 @@
                        margin   : defaults.margin,
                        distance : defaults.distance,
                        interval : defaults.interval,
-                       container: defaults.container,
+                       container: defaults.container
                    };
                 }
 
-                autoScroll.margin    = this.validateSetting('autoScroll', 'margin'   , options.margin);
-                autoScroll.distance  = this.validateSetting('autoScroll', 'distance' , options.distance);
-                autoScroll.interval  = this.validateSetting('autoScroll', 'interval' , options.interval);
-                autoScroll.container = this.validateSetting('autoScroll', 'container', options.container);
+                autoScroll.margin = this.validateSetting('autoScroll', 'margin', options.margin);
+                autoScroll.speed  = this.validateSetting('autoScroll', 'speed' , options.speed);
+
+                autoScroll.container =
+                    (isElement(options.container) || options.container instanceof window.Window
+                     ? options.container
+                     : defaults.container);
+
 
                 this.options.autoScrollEnabled = true;
                 this.options.autoScroll = autoScroll;
@@ -2037,28 +3064,29 @@
          = (Interactable) this Interactable
          > Usage
          | interact('.handle').snap({
-         |     mode        : 'grid',
-         |     range       : Infinity,
-         |     grid        : { x: 100, y: 100 },
-         |     gridOffset  : { x:   0, y:   0 },
+         |     mode        : 'grid',                // event coords should snap to the corners of a grid
+         |     range       : Infinity,              // the effective distance of snap ponts
+         |     grid        : { x: 100, y: 100 },    // the x and y spacing of the grid points
+         |     gridOffset  : { x:   0, y:   0 },    // the offset of the grid points
          | });
          |
          | interact('.handle').snap({
-         |     mode        : 'anchor',
+         |     mode        : 'anchor',              // snap to specified points
          |     anchors     : [
-         |         { x: 100, y: 100, range: 25 },
-         |         { x: 200, y: 200 }
+         |         { x: 100, y: 100, range: 25 },   // a point with x, y and a specific range
+         |         { x: 200, y: 200 }               // a point with x and y. it uses the default range
          |     ]
          | });
          |
          | interact(document.querySelector('#thing')).snap({
          |     mode : 'path',
          |     paths: [
-         |         {
+         |         {            // snap to points on these x and y axes
          |             x: 100,
          |             y: 100,
          |             range: 25
          |         },
+         |         // give this function the x and y page coords and snap to the object returned
          |         function (x, y) {
          |             return {
          |                 x: x,
@@ -2067,6 +3095,13 @@
          |             };
          |         }]
          | })
+         |
+         | interact(element).snap({
+         |     // do not snap during normal movement.
+         |     // Instead, trigger only one snapped move event
+         |     // immediately before the end event.
+         |     endOnly: true       
+         | });
         \*/
         snap: function (options) {
             var defaults = defaultOptions.snap;
@@ -2075,16 +3110,12 @@
                 var snap = this.options.snap;
 
                 if (snap === defaults) {
-                   snap = this.options.snap = {
-                       mode      : defaults.mode,
-                       range     : defaults.range,
-                       grid      : defaults.grid,
-                       gridOffset: defaults.gridOffset,
-                       anchors   : defaults.anchors
-                   };
+                   snap = {};
                 }
 
                 snap.mode       = this.validateSetting('snap', 'mode'      , options.mode);
+                snap.endOnly    = this.validateSetting('snap', 'endOnly'   , options.endOnly);
+                snap.actions    = this.validateSetting('snap', 'actions'   , options.actions);
                 snap.range      = this.validateSetting('snap', 'range'     , options.range);
                 snap.paths      = this.validateSetting('snap', 'paths'     , options.paths);
                 snap.grid       = this.validateSetting('snap', 'grid'      , options.grid);
@@ -2116,6 +3147,84 @@
         },
 
         /*\
+         * Interactable.inertia
+         [ method ]
+         **
+         * Returns or sets if and how events continue to run after the pointer is released
+         **
+         = (boolean | object) `false` if inertia is disabled; `object` with inertia properties if inertia is enabled
+         **
+         * or
+         **
+         - options (object | boolean | null) #optional
+         = (Interactable) this Interactable
+         > Usage
+         | // enable and use default settings
+         | interact(element).inertia(true);
+         |
+         | // enable and use custom settings
+         | interact(element).inertia({
+         |     // value greater than 0
+         |     // high values slow the object down more quickly
+         |     resistance  : 16,
+         |
+         |     // the minimum launch speed (pixels per second) that results in inertiastart
+         |     minSpeed    : 200,
+         |
+         |     // inertia will stop when the object slows down to this speed
+         |     endSpeed    : 20,
+         |
+         |     // an array of action types that can have inertia (no gesture)
+         |     actions     : ['drag', 'resize']
+         | });
+         |
+         | // reset custom settings and use all defaults
+         | interact(element).inertia(null);
+        \*/
+        inertia: function (options) {
+            var defaults = defaultOptions.inertia;
+
+            if (options instanceof Object) {
+                var inertia = this.options.inertia;
+
+                if (inertia === defaults) {
+                   inertia = this.options.inertia = {
+                       resistance: defaults.resistance,
+                       minSpeed  : defaults.minSpeed,
+                       endSpeed  : defaults.endSpeed
+                   };
+                }
+
+                inertia.resistance = this.validateSetting('inertia', 'resistance', options.resistance);
+                inertia.minSpeed   = this.validateSetting('inertia', 'minSpeed'  , options.minSpeed);
+                inertia.endSpeed   = this.validateSetting('inertia', 'endSpeed'  , options.endSpeed);
+                inertia.actions    = this.validateSetting('inertia', 'actions'   , options.actions);
+
+                this.options.inertiaEnabled = true;
+                this.options.inertia = inertia;
+
+                return this;
+            }
+
+            if (typeof options === 'boolean') {
+                this.options.inertiaEnabled = options;
+
+                return this;
+            }
+
+            if (options === null) {
+                delete this.options.inertiaEnabled;
+                delete this.options.inertia;
+
+                return this;
+            }
+
+            return (this.options.inertiaEnabled
+                ? this.options.inertia
+                : false);
+        },
+
+        /*\
          * Interactable.getAction
          [ method ]
          *
@@ -2134,23 +3243,23 @@
                 page = getPageXY(event),
                 options = this.options;
 
-            if (actionIsEnabled.resize && options.resizeable) {
+            if (actionIsEnabled.resize && options.resizable) {
                 right  = page.x > (rect.right  - margin);
                 bottom = page.y > (rect.bottom - margin);
             }
 
-            if (actionIsEnabled.gesture &&
-                    event.touches && event.touches.length >= 2 &&
+            resizeAxes = (right?'x': '') + (bottom?'y': '');
+            action = (resizeAxes)?
+                'resize' + resizeAxes:
+                actionIsEnabled.drag && options.draggable?
+                    'drag':
+                    null;
+
+            if (actionIsEnabled.gesture
+                && ((event.touches && event.touches.length >= 2)
+                    || (PointerEvent && pointerIds.length >=2)) &&
                     !(dragging || resizing)) {
                 action = 'gesture';
-            }
-            else {
-                resizeAxes = (right?'x': '') + (bottom?'y': '');
-                action = (resizeAxes)?
-                    'resize' + resizeAxes:
-                    actionIsEnabled.drag && options.draggable?
-                        'drag':
-                        null;
             }
 
             return action;
@@ -2200,19 +3309,11 @@
          o }
         \*/
         getRect: function rectCheck () {
-            var scroll = getScrollXY(),
-                clientRect = (this._element instanceof SVGElement)?
-                    this._element.getBoundingClientRect():
-                    this._element.getClientRects()[0];
+            if (this.selector && !(isElement(this._element))) {
+                this._element = document.querySelector(this.selector);
+            }
 
-            return {
-                left  : clientRect.left   + scroll.x,
-                right : clientRect.right  + scroll.x,
-                top   : clientRect.top    + scroll.y,
-                bottom: clientRect.bottom + scroll.y,
-                width : clientRect.width || clientRect.right - clientRect.left,
-                height: clientRect.heigh || clientRect.bottom - clientRect.top
-            };
+            return getElementRect(this._element);
         },
 
         /*\
@@ -2276,10 +3377,13 @@
          * of the origin will be subtracted from action event coordinates.
          *
          - origin (object) #optional An object with x and y properties which are numbers
+         * OR
+         - origin (Element) #optional An HTML or SVG Element whose rect will be used
+         **
          = (object) The current origin or this Interactable
         \*/
         origin: function (newValue) {
-            if (newValue instanceof Object) {
+            if (newValue instanceof Object || /^parent$|^self$/.test(newValue)) {
                 this.options.origin = newValue;
 
                 return this;
@@ -2318,6 +3422,68 @@
             }
 
             return this.options.deltaSource;
+        },
+
+        /*\
+         * Interactable.restrict
+         [ method ]
+         *
+         * Returns or sets the rectangles within which actions on this
+         * interactable (after snap calculations) are restricted.
+         *
+         - newValue (object) #optional an object with keys drag, resize, and/or gesture and rects or Elements as values
+         = (object) The current restrictions object or this Interactable
+         **
+         | interact(element).restrict({
+         |     // the rect will be `interact.getElementRect(element.parentNode)`
+         |     drag: element.parentNode,
+         |
+         |     // x and y are relative to the the interactable's origin
+         |     resize: { x: 100, y: 100, width: 200, height: 200 }
+         | })
+         |
+         | interact('.draggable').restrict({
+         |     // the rect will be the selected element's parent
+         |     drag: 'parent',
+         |
+         |     // do not restrict during normal movement.
+         |     // Instead, trigger only one restricted move event
+         |     // immediately before the end event.
+         |     endOnly: true       
+         | });
+        \*/
+        restrict: function (newValue) {
+            if (newValue === undefined) {
+                return this.options.restrict;
+            }
+
+            if (newValue instanceof Object) {
+                var newRestrictions = {};
+
+                if (newValue.drag instanceof Object || /^parent$|^self$/.test(newValue.drag)) {
+                    newRestrictions.drag = newValue.drag;
+                }
+                if (newValue.resize instanceof Object || /^parent$|^self$/.test(newValue.resize)) {
+                    newRestrictions.resize = newValue.resize;
+                }
+                if (newValue.gesture instanceof Object || /^parent$|^self$/.test(newValue.gesture)) {
+                    newRestrictions.gesture = newValue.gesture;
+                }
+
+                if (typeof newValue.endOnly === 'boolean') {
+                    newRestrictions.endOnly = newValue.endOnly;
+                }
+
+                this.options.restrictEnabled = true;
+                this.options.restrict = newRestrictions;
+            }
+
+            else if (newValue === null) {
+               delete this.options.restrict;
+               delete this.options.restrictEnabled;
+            }
+
+            return this;
         },
 
         /*\
@@ -2375,10 +3541,19 @@
                     }
                 }
 
-                if ('elementTypes' in defaults && defaults.elementTypes.test(option)) {
-                    if (value instanceof Element) { return value; }
+                if ('boolTypes' in defaults && defaults.boolTypes.test(option)) {
+                    if (typeof value === 'boolean') { return value; }
                     else {
-                        return (option in current && current[option] instanceof Element
+                        return (option in current && typeof current[option] === 'boolean'
+                            ? current[option]
+                            : defaults[option]);
+                    }
+                }
+
+                if ('elementTypes' in defaults && defaults.elementTypes.test(option)) {
+                    if (isElement(value)) { return value; }
+                    else {
+                        return (option in current && isElement(current[option])
                             ? current[option]
                             : defaults[option]);
                     }
@@ -2427,19 +3602,12 @@
             while (fireState < 3) {
                 try {
                     switch (fireState) {
-                        // interactable.onevent listener
-                        case fireStates.onevent:
-                            if (typeof this[onEvent] === 'function') {
-                            this[onEvent](iEvent);
-                        }
-                        break;
-
                         // Interactable#on() listeners
                         case fireStates.directBind:
                             if (iEvent.type in this._iEvents) {
                             listeners = this._iEvents[iEvent.type];
 
-                            for (len = listeners.length; i < len && !imPropStopped; i++) {
+                            for (len = listeners.length; i < len && !iEvent.immediatePropagationStopped; i++) {
                                 listeners[i](iEvent);
                             }
                             break;
@@ -2447,15 +3615,25 @@
 
                         break;
 
+                        // interactable.onevent listener
+                        case fireStates.onevent:
+                            if (typeof this[onEvent] === 'function') {
+                            this[onEvent](iEvent);
+                        }
+                        break;
+
                         // interact.on() listeners
                         case fireStates.globalBind:
                             if (iEvent.type in globalEvents && (listeners = globalEvents[iEvent.type]))  {
-                            listeners = globalEvents[iEvent.type];
 
-                            for (len = listeners.length; i < len && !imPropStopped; i++) {
+                            for (len = listeners.length; i < len && !iEvent.immediatePropagationStopped; i++) {
                                 listeners[i](iEvent);
                             }
                         }
+                    }
+
+                    if (iEvent.propagationStopped) {
+                        break;
                     }
 
                     i = 0;
@@ -2472,8 +3650,6 @@
                 }
             }
 
-            imPropStopped = false;
-
             return this;
         },
 
@@ -2481,7 +3657,7 @@
          * Interactable.on
          [ method ]
          *
-         * Binds a listener for an InteractEvent or DOM event
+         * Binds a listener for an InteractEvent or DOM event.
          *
          - eventType  (string)   The type of event to listen for
          - listener   (function) The function to be called on that event
@@ -2503,12 +3679,26 @@
                     this._iEvents[eventType].push(listener);
                 }
             }
+            // delegated event for selector
             else if (this.selector) {
-                var elements = document.querySelectorAll(this.selector);
-
-                for (var i = 0, len = elements.length; i < len; i++) {
-                    events.addToElement(elements[i], eventType, listener, useCapture);
+                if (!delegatedEvents[eventType]) {
+                    delegatedEvents[eventType] = {};
                 }
+
+                var delegated = delegatedEvents[eventType];
+
+                if (!delegated[this.selector]) {
+                    delegated[this.selector] = [];
+                }
+
+                // keep listener and useCapture flag
+                delegated[this.selector].push([listener, useCapture? true: false]);
+
+                // add appropriate delegate listener
+                events.add(docTarget,
+                           eventType,
+                           useCapture? delegateUseCapture: delegateListener,
+                           useCapture);
             }
             else {
                 events.add(this, eventType, listener, useCapture);
@@ -2529,25 +3719,44 @@
          = (object) This Interactable
         \*/
         off: function (eventType, listener, useCapture) {
+            var eventList,
+                index = -1;
+
+            // convert to boolean
+            useCapture = useCapture? true: false;
+
             if (eventType === 'wheel') {
                 eventType = wheelEvent;
             }
 
+            // if it is an action event type
             if (eventTypes.indexOf(eventType) !== -1) {
-                var eventArray = this._iEvents[eventType],
-                    index;
+                eventList = this._iEvents[eventType];
 
-                if (eventArray && (index = eventArray.indexOf(listener)) !== -1) {
+                if (eventList && (index = eventList.indexOf(listener)) !== -1) {
                     this._iEvents[eventType].splice(index, 1);
                 }
             }
+            // delegated event
             else if (this.selector) {
-                var elements = document.querySelectorAll(this.selector);
+                var delegated = delegatedEvents[eventType];
 
-                for (var i = 0, len = elements.length; i < len; i++) {
-                    events.removeFromElement(elements[i], eventType, listener, useCapture);
+                if (delegated && (eventList = delegated[this.selector])) {
+
+                    // look for listener with matching useCapture flag
+                    for (index = 0; index < eventList.length; index++) {
+                        if (eventList[index][1] === useCapture) {
+                            break;
+                        }
+                    }
+
+                    // remove found listener from delegated list
+                    if (index < eventList.length) {
+                        eventList.splice(index, 1);
+                    }
                 }
             }
+            // remove listener from this Interatable's element
             else {
                 events.remove(this._element, listener, useCapture);
             }
@@ -2571,8 +3780,8 @@
 
             this.draggable  ('draggable'   in options? options.draggable  : this.options.draggable  );
             this.dropzone   ('dropzone'    in options? options.dropzone   : this.options.dropzone   );
-            this.resizeable ('resizeable'  in options? options.resizeable : this.options.resizeable );
-            this.gestureable('gestureable' in options? options.gestureable: this.options.gestureable);
+            this.resizable ('resizable'  in options? options.resizable : this.options.resizable );
+            this.gesturable('gesturable' in options? options.gesturable: this.options.gesturable);
 
             if ('autoScroll'  in options) { this.autoScroll (options.autoScroll ); }
 
@@ -2599,16 +3808,24 @@
                 if (this.options.styleCursor) {
                     this._element.style.cursor = '';
                 }
+
+                if (this._gesture) {
+                    this._gesture.target = null;
+                }
+
                 elements.splice(elements.indexOf(this.element()));
             }
 
-            this.dropzone   (false);
+            this.dropzone(false);
 
             interactables.splice(interactables.indexOf(this), 1);
 
             return interact;
         }
     };
+
+    Interactable.prototype.gestureable = Interactable.prototype.gesturable;
+    Interactable.prototype.resizeable = Interactable.prototype.resizable;
 
     /*\
      * interact.isSet
@@ -2626,26 +3843,33 @@
      * interact.on
      [ method ]
      *
-     * Adds a global listener for an InteractEvent
+     * Adds a global listener for an InteractEvent or adds a DOM event to
+     * `document`
      *
-     - eventType  (string)   The type of event to listen for
+     - type       (string)   The type of event to listen for
      - listener   (function) The function to be called on that event
+     - useCapture (boolean) #optional useCapture flag for addEventListener
      = (object) interact
     \*/
-    interact.on = function (iEventType, listener) {
-        // The event must be an InteractEvent type
-        if (eventTypes.indexOf(iEventType) !== -1) {
-            // if this type of event was never bound to this Interactable
-            if (!globalEvents[iEventType]) {
-                globalEvents[iEventType] = [listener];
+    interact.on = function (type, listener, useCapture) {
+        // if it is an InteractEvent type, add listener to globalEvents
+        if (eventTypes.indexOf(type) !== -1) {
+            // if this type of event was never bound
+            if (!globalEvents[type]) {
+                globalEvents[type] = [listener];
             }
 
             // if the event listener is not already bound for this type
-            else if (globalEvents[iEventType].indexOf(listener) === -1) {
+            else if (globalEvents[type].indexOf(listener) === -1) {
 
-                globalEvents[iEventType].push(listener);
+                globalEvents[type].push(listener);
             }
         }
+        // If non InteratEvent type, addEventListener to document
+        else {
+            events.add(docTarget, type, listener, useCapture);
+        }
+
         return interact;
     };
 
@@ -2653,18 +3877,26 @@
      * interact.off
      [ method ]
      *
-     * Removes a global InteractEvent listener
+     * Removes a global InteractEvent listener or DOM event from `document`
      *
-     - eventType  (string)   The type of event that was listened for
+     - type       (string)   The type of event that was listened for
      - listener   (function) The listener function to be removed
+     - useCapture (boolean) #optional useCapture flag for removeEventListener
      = (object) interact
     \*/
-    interact.off = function (iEventType, listener) {
-        var index = globalEvents[iEventType].indexOf(listener);
-
-        if (index !== -1) {
-            globalEvents[iEventType].splice(index, 1);
+    interact.off = function (type, listener, useCapture) {
+        if (eventTypes.indexOf(type) === -1) {
+            events.remove(docTarget, type, listener, useCapture);
         }
+        else {
+            var index;
+
+            if (type in globalEvents
+                && (index = globalEvents[type].indexOf(listener)) !== -1) {
+                globalEvents[type].splice(index, 1);
+            }
+        }
+
         return interact;
     };
 
@@ -2790,36 +4022,52 @@
             dragging              : dragging,
             resizing              : resizing,
             gesturing             : gesturing,
-            prevX                 : prevX,
-            prevY                 : prevY,
-            x0                    : x0,
-            y0                    : y0,
+            prepared              : prepared,
+
+            prevCoords            : prevCoords,
+            downCoords            : startCoords,
+
+            pointerIds            : pointerIds,
+            pointerMoves          : pointerMoves,
+            addPointer            : addPointer,
+            removePointer         : removePointer,
+            recordPointers        : recordPointers,
+
+            inertia               : inertiaStatus,
+
+            downTime              : downTime,
+            downEvent             : downEvent,
+            prevEvent             : prevEvent,
+
             Interactable          : Interactable,
             IOptions              : IOptions,
             interactables         : interactables,
             dropzones             : dropzones,
             pointerIsDown         : pointerIsDown,
-            supportsTouch         : supportsTouch,
             defaultOptions        : defaultOptions,
-            defaultActionChecker  : Interactable.prototype.getAction,
+
+            actions               : actions,
             dragMove              : dragMove,
             resizeMove            : resizeMove,
             gestureMove           : gestureMove,
-            pointerUp             : docPointerUp,
+            pointerUp             : pointerUp,
             pointerDown           : pointerDown,
+            pointerMove           : pointerMove,
             pointerHover          : pointerHover,
+
             events                : events,
             globalEvents          : globalEvents,
-            log: function () {
-                console.log('target         :  ' + target);
-                console.log('prevX, prevY   :  ' + prevX, prevY);
-                console.log('x0, y0         :  ' + x0, y0);
-                console.log('supportsTouch  :  ' + supportsTouch);
-                console.log('pointerIsDown  :  ' + pointerIsDown);
-                console.log('currentAction  :  ' + interact.currentAction());
-            }
+            delegatedEvents       : delegatedEvents
         };
     };
+
+    // expose the functions used to caluclate multi-touch properties
+    interact.getTouchAverage  = touchAverage;
+    interact.getTouchBBox     = touchBBox;
+    interact.getTouchDistance = touchDistance;
+    interact.getTouchAngle    = touchAngle;
+
+    interact.getElementRect   = getElementRect;
 
     /*\
      * interact.margin
@@ -2878,13 +4126,13 @@
         if (options instanceof Object) {
             defaultOptions.autoScrollEnabled = true;
 
-            if (typeof (options.margin)   === 'number') { defaults.margin    = options.margin   ; }
-            if (typeof (options.distance) === 'number') { defaults.distance  = options.distance ; }
-            if (typeof (options.interval) === 'number') { defaults.interval  = options.interval ; }
+            if (typeof (options.margin) === 'number') { defaults.margin = options.margin;}
+            if (typeof (options.speed)  === 'number') { defaults.speed  = options.speed ;}
 
-            defaults.container = options.container instanceof Element?
-                options.container:
-                defaults.container;
+            defaults.container =
+                (isElement(options.container) || options.container instanceof window.Window
+                 ? options.container
+                 : defaults.container);
 
             return interact;
         }
@@ -2940,10 +4188,12 @@
         if (options instanceof Object) {
             defaultOptions.snapEnabled = true;
 
-            if (typeof options.mode  === 'string') { snap.mode    = options.mode;   }
-            if (typeof options.range === 'number') { snap.range   = options.range;  }
-            if (options.anchors instanceof Array ) { snap.anchors = options.anchors;}
-            if (options.grid instanceof   Object ) { snap.grid    = options.grid;   }
+            if (typeof options.mode    === 'string' ) { snap.mode    = options.mode;    }
+            if (typeof options.endOnly === 'boolean') { snap.endOnly = options.endOnly; }
+            if (typeof options.range   === 'number' ) { snap.range   = options.range;   }
+            if (options.actions    instanceof Array ) { snap.actions    = options.actions;    }
+            if (options.anchors    instanceof Array ) { snap.anchors    = options.anchors;    }
+            if (options.grid       instanceof Object) { snap.grid       = options.grid;       }
             if (options.gridOffset instanceof Object) { snap.gridOffset = options.gridOffset; }
 
             return interact;
@@ -2957,6 +4207,7 @@
         return {
             enabled   : defaultOptions.snapEnabled,
             mode      : snap.mode,
+            actions   : snap.actions,
             grid      : snap.grid,
             gridOffset: snap.gridOffset,
             anchors   : snap.anchors,
@@ -2969,6 +4220,48 @@
             realY     : snapStatus.realY,
             dx        : snapStatus.dx,
             dy        : snapStatus.dy
+        };
+    };
+
+    /*\
+     * interact.inertia
+     [ method ]
+     *
+     * Returns or sets inertia settings.
+     *
+     * See @Interactable.inertia
+     *
+     - options (boolean | object) #optional New settings
+     * `true` or `false` to simply enable or disable
+     * or an object of inertia options
+     = (object | interact) The default inertia settings object or interact
+    \*/
+    interact.inertia = function (options) {
+        var inertia = defaultOptions.inertia;
+
+        if (options instanceof Object) {
+            defaultOptions.inertiaEnabled = true;
+
+            if (typeof options.resistance === 'number') { inertia.resistance = options.resistance;}
+            if (typeof options.minSpeed   === 'number') { inertia.minSpeed   = options.minSpeed  ;}
+            if (typeof options.endSpeed   === 'number') { inertia.endSpeed   = options.endSpeed  ;}
+
+            if (options.actions instanceof Array) { inertia.actions = options.actions; }
+
+            return interact;
+        }
+        if (typeof options === 'boolean') {
+            defaultOptions.inertiaEnabled = options;
+
+            return interact;
+        }
+
+        return {
+            enabled: defaultOptions.inertiaEnabled,
+            resistance: inertia.resistance,
+            minSpeed: inertia.minSpeed,
+            endSpeed: inertia.endSpeed,
+            actions: inertia.actions
         };
     };
 
@@ -3009,6 +4302,11 @@
             if (target.options.styleCursor) {
                 document.documentElement.style.cursor = '';
             }
+
+            if (target._gesture) {
+                target._gesture.stop();
+            }
+
             clearTargets();
 
             for (var i = 0; i < selectorDZs.length; i++) {
@@ -3021,9 +4319,15 @@
             }
         }
 
+        if (pointerIds && pointerIds.length) {
+            pointerIds.splice(0);
+            pointerMoves.splice(0);
+        }
+
         pointerIsDown = snapStatus.locked = dragging = resizing = gesturing = false;
-        pointerWasMoved = true;
-        prepared = null;
+        prepared = prevEvent = null;
+        // do not clear the downEvent so that it can be used to
+        // test for browser-simulated mouse events after touch
 
         return interact;
     };
@@ -3072,27 +4376,104 @@
     };
 
 
-    events.add(docTarget   , 'mousedown'    , selectorDown);
-    events.add(docTarget   , 'touchstart'   , selectorDown);
-    events.add(docTarget   , 'mousemove'    , pointerMove );
-    events.add(docTarget   , 'touchmove'    , pointerMove );
-    events.add(docTarget   , 'mouseover'    , pointerOver );
-    events.add(docTarget   , 'mouseout'     , pointerOut  );
-    events.add(docTarget   , 'mouseup'      , docPointerUp);
-    events.add(docTarget   , 'touchend'     , docPointerUp);
-    events.add(docTarget   , 'touchcancel'  , docPointerUp);
-    events.add(windowTarget, 'blur'         , docPointerUp);
+    /*\
+     * interact.restrict
+     [ method ]
+     *
+     * Returns or sets the default rectangles within which actions (after snap
+     * calculations) are restricted.
+     *
+     * See @Interactable.restrict
+     *
+     - newValue (object) #optional an object with keys drag, resize, and/or gesture and rects or Elements as values
+     = (object) The current restrictions object or interact
+    \*/
+    interact.restrict = function (newValue) {
+        var defaults = defaultOptions.restrict;
 
-    if (window.parent !== window) {
-        try {
-            events.add(parentDocTarget   , 'mouseup'      , docPointerUp);
-            events.add(parentDocTarget   , 'touchend'     , docPointerUp);
-            events.add(parentDocTarget   , 'touchcancel'  , docPointerUp);
-            events.add(parentWindowTarget, 'blur'         , docPointerUp);
+        if (newValue === undefined) {
+            return defaultOptions.restrict;
         }
-        catch (error) {
-            interact.windowParentError = error;
+
+        if (newValue instanceof Object) {
+            if (newValue.drag instanceof Object || /^parent$|^self$/.test(newValue.drag)) {
+                defaults.drag = newValue.drag;
+            }
+            if (newValue.resize instanceof Object || /^parent$|^self$/.test(newValue.resize)) {
+                defaults.resize = newValue.resize;
+            }
+            if (newValue.gesture instanceof Object || /^parent$|^self$/.test(newValue.gesture)) {
+                defaults.gesture = newValue.gesture;
+            }
+
+            if (typeof newValue.endOnly === 'boolean') {
+                defaults.endOnly = newValue.endOnly;
+            }
         }
+
+        else if (newValue === null) {
+           defaults.drag = defaults.resize = defaults.gesture = null;
+           defaults.endOnly = false;
+        }
+
+        return this;
+    };
+
+    if (PointerEvent) {
+        events.add(docTarget, 'pointerup', collectTaps);
+
+        events.add(docTarget, 'pointerdown'    , selectorDown);
+        events.add(docTarget, 'MSGestureChange', pointerMove );
+        events.add(docTarget, 'MSGestureEnd'   , pointerUp   );
+        events.add(docTarget, 'MSInertiaStart' , pointerUp   );
+        events.add(docTarget, 'pointerover'    , pointerOver );
+        events.add(docTarget, 'pointerout'     , pointerOut  );
+
+        events.add(docTarget, 'pointermove'  , recordPointers);
+        events.add(docTarget, 'pointerup'    , recordPointers);
+        events.add(docTarget, 'pointercancel', recordPointers);
+
+        // fix problems of wrong targets in IE
+        events.add(docTarget, 'pointerup', function () {
+            if (!(dragging || resizing || gesturing)) {
+                pointerIsDown = false;
+            }
+        });
+
+        selectorGesture = new Gesture();
+        selectorGesture.target = document.documentElement;
+    }
+    else {
+        events.add(docTarget, 'mouseup' , collectTaps);
+        events.add(docTarget, 'touchend', collectTaps);
+
+        events.add(docTarget, 'mousedown', selectorDown);
+        events.add(docTarget, 'mousemove', pointerMove );
+        events.add(docTarget, 'mouseup'  , pointerUp   );
+        events.add(docTarget, 'mouseover', pointerOver );
+        events.add(docTarget, 'mouseout' , pointerOut  );
+
+        events.add(docTarget, 'touchstart' , selectorDown);
+        events.add(docTarget, 'touchmove'  , pointerMove );
+        events.add(docTarget, 'touchend'   , pointerUp   );
+        events.add(docTarget, 'touchcancel', pointerUp   );
+    }
+
+    events.add(windowTarget, 'blur', pointerUp);
+
+    try {
+        if (window.frameElement) {
+            parentDocTarget._element = window.frameElement.ownerDocument;
+
+            events.add(parentDocTarget   , 'mouseup'      , pointerUp);
+            events.add(parentDocTarget   , 'touchend'     , pointerUp);
+            events.add(parentDocTarget   , 'touchcancel'  , pointerUp);
+            events.add(parentDocTarget   , 'pointerup'    , pointerUp);
+            events.add(parentWindowTarget, 'blur'         , pointerUp);
+        }
+    }
+    catch (error) {
+        interact.windowParentError = error;
     }
 
     // For IE's lack of Event#preventDefault
@@ -3108,7 +4489,7 @@
             // http://tanalin.com/en/blog/2012/12/matches-selector-ie8/
             // modified for better performance
             elems = elems || this.parentNode.querySelectorAll(selector);
-            count = elems.length;
+            var count = elems.length;
 
             for (var i = 0; i < count; i++) {
                 if (elems[i] === this) {
@@ -3120,7 +4501,36 @@
         };
     }
 
+    // requestAnimationFrame polyfill
+    (function() {
+        var lastTime = 0,
+            vendors = ['ms', 'moz', 'webkit', 'o'];
+
+        for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+            reqFrame = window[vendors[x]+'RequestAnimationFrame'];
+            cancelFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+        }
+
+        if (!reqFrame) {
+            reqFrame = function(callback) {
+                var currTime = new Date().getTime(),
+                    timeToCall = Math.max(0, 16 - (currTime - lastTime)),
+                    id = window.setTimeout(function() { callback(currTime + timeToCall); },
+                  timeToCall);
+                lastTime = currTime + timeToCall;
+                return id;
+            };
+        }
+
+        if (!cancelFrame) {
+            cancelFrame = function(id) {
+                clearTimeout(id);
+            };
+        }
+    }());
+
     // http://documentcloud.github.io/underscore/docs/underscore.html#section-11
+    /* global exports: true, module */
     if (typeof exports !== 'undefined') {
         if (typeof module !== 'undefined' && module.exports) {
             exports = module.exports = interact;
