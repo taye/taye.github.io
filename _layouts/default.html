@@ -16,20 +16,20 @@ google_plus : "107750313581859477605"
     {% elsif page.excerpt  && page.excerpt != ""%}
         <meta name="description" content="{{ page.excerpt }}" />
     {% endif %}
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
         <link rel="alternate" type="application/rss+xml" href="{{ site.baseurl }}/rss.xml"/>
 
         <!-- syntax highlighting CSS -->
-        <link rel="stylesheet" href="{{ site.baseurl }}/css/syntax.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/css/syntax.css"/>
 
         <!-- Custom CSS -->
-        <link rel="stylesheet" href="{{ site.baseurl }}/css/normalize.css">
-        <link rel="stylesheet" href="{{ site.baseurl }}/css/taye.css">
+        <link rel="stylesheet" href="{{ site.baseurl }}/css/normalize.css"/>
+        <link rel="stylesheet" href="{{ site.baseurl /}}/css/taye.css"/>
         <link rel="icon" href="{{ site.baseurl }}/img/hm-64.png"/>
 
 {% for style in page.styles %}
-        <link rel="stylesheet" href="{{ site.baseurl }}/css/{{ style }}.css"> {% endfor %}
+        <link rel="stylesheet" href="{{ site.baseurl }}/css/{{ style }}.css"/> {% endfor %}
 {% for script in page.scripts %}
         <script src="{{ site.baseurl }}/js/{{ script }}.js"></script>{% endfor %}
 
