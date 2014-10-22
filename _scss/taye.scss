@@ -1,6 +1,6 @@
 body {
   background-color: #FFF;
-  font-family: "Merriweather", Helvetica, Arial, sans-serif;
+  font-family: "Merriweather", sans-serif;
   margin: auto;
 }
 
@@ -13,7 +13,7 @@ h2 {
 }
 
 header {
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: sans-serif;
 
   a {
     font-weight: bold;
@@ -171,7 +171,7 @@ table.posts {
   .post-date {
     vertical-align: middle;
     color: #aaa;
-    font-family: Monaco, "Courier New", monospace;
+    font-family: Monaco, monospace;
     font-size: 90%;
   }
 
