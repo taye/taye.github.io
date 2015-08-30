@@ -90,19 +90,19 @@ Style the right click target element so that it is invisible and placed
 off-screen.
 
 ```css
-    #rc-target {
-        z-index : 9003;
-        width   : 100px;
-        height  : 100px;
-        margin  : -50px;  /* so it's positioned at it's centre */
-        opacity : 0;
-        border  : none;
-        padding : 0;
+#rc-target {
+    z-index : 9003;
+    width   : 100px;
+    height  : 100px;
+    margin  : -50px;  /* so it's positioned at it's centre */
+    opacity : 0;
+    border  : none;
+    padding : 0;
 
-        position: absolute;
-        left    : -1000px;
-        right   : -1000px;
-    }
+    position: absolute;
+    left    : -1000px;
+    right   : -1000px;
+}
 ```
 
 Add a `mousedown` event listener that checks for right-clicks
@@ -129,11 +129,11 @@ document.addEventListener('mousedown' function (event) {
 });
 
 // Hide the `#rc-target` element on `mousemove`
-    document.addEventListener('mousemove', function (event) {
-        var rcTarget = document.getElementById('rc-target');
+document.addEventListener('mousemove', function (event) {
+    var rcTarget = document.getElementById('rc-target');
 
-        rcTarget.style.left = rcTarget.style.top = '';
-    });
+    rcTarget.style.left = rcTarget.style.top = '';
+});
 ```
 
 After mouseup, the context menu will be displayed for the `#rc-target` element.
