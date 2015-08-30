@@ -45,40 +45,35 @@ the time the user input sequence is complete, it will be targeting the element
 and content you choose.
 
 ## Handling keyboard shortcuts (Ctrl+C / Ctrl+V)
-1. Add an event listener for `keydown` events
 
-    ```javascript
-    document.addEventListener('keydown', function (event) {
-    ```
-2. In this event listener, check if the [V] key is pressed while [Ctrl] is held
-   down (the paste shortcut).
+```javascript
+// 1. Add an event listener for `keydown` events
+document.addEventListener('keydown', function (event) {
 
-   ```javascript
-        if (event.keyCode === 86 && event.ctrlKey) {
-    ```
-3. If that is true, set focus to an input element so that a `paste` event is
-   fired.
+    // 2. In this event listener, check if the [V] key is pressed while [Ctrl] is held
+    down (the paste shortcut).
 
-   ```javascript
-            document.getElementByid('paste-target').focus();
+    if (event.keyCode === 86 && event.ctrlKey) {
+
+        // 3. If that is true, set focus to an input element so that a `paste`
+        // event is fired.
+        document.getElementByid('paste-target').focus();
         }
-    ```
-4. Otherwise check if [Ctrl] and [C] or [X] were pressed (copy or cut).
 
-    ```javascript
-        else if (event.keyCode === 67 || event.keyCode === 88) {
-    ```
-5. If true, set focus to an input element and select the containted text. It is
+    // 4. Otherwise check if [Ctrl] and [C] or [X] were pressed (copy or cut).
+    else if (event.keyCode === 67 || event.keyCode === 88) {
+
+    // 5. If true, set focus to an input element and select the containted text. It is
    this text that will be sent to the clipboard.
 
-    ```javascript
-            var copyTarget = document.getElementByid('copy-target');
+        var copyTarget = document.getElementByid('copy-target');
 
-            copyTarget.focus();
-            copyTarget.select();
-        }
-    });
-    ```
+        copyTarget.focus();
+        copyTarget.select();
+    }
+});
+```
+
 <br>
 
 ## Handling right-click context menu cut/copy/paste
@@ -91,10 +86,10 @@ clickable element.
 
 If this element is invisible then it does not interrupt the user's workflow.
 
-1. Style the right click target element so that it is invisible and placed
-   off-screen.
+Style the right click target element so that it is invisible and placed
+off-screen.
 
-   ```css
+```css
     #rc-target {
         z-index : 9003;
         width   : 100px;
@@ -108,42 +103,38 @@ If this element is invisible then it does not interrupt the user's workflow.
         left    : -1000px;
         right   : -1000px;
     }
-    ```
-2. Add a `mousedown` event listener that checks for right-clicks
+```
 
-    ```javascript
-    document.addEventListener('mousedown' function (event) {
-        if (event.button === 2) {
-    ```
-3. If the button is the right mouse button, move the input element to the
-   coordinates of the event
+Add a `mousedown` event listener that checks for right-clicks
 
-   ```javascript
-            var rcTarget = document.getElementByid('rc-target');
+```javascript
+document.addEventListener('mousedown' function (event) {
+    if (event.button === 2) {
 
-            rcTarget.style.left = event.pageX;
-            rcTarget.style.top  = event.pageY;
-    ```
-4. Then bring focus to the element and select the text inside it and prevent
-   the default event behaviour
+// If the button is the right mouse button, move the input element to the
+// coordinates of the event
+        var rcTarget = document.getElementByid('rc-target');
 
-   ```javascript
-            rcTarget.focus();
-            rcTarget.select();
+        rcTarget.style.left = event.pageX;
+        rcTarget.style.top  = event.pageY;
 
-            event.preventDefault();
-        }
-    });
-    ```
-5. Hide the `#rc-target` element on `mousemove`
+// Then bring focus to the element and select the text inside it and prevent
+// the default event behaviour
 
-    ```javascript
+        rcTarget.focus();
+        rcTarget.select();
+
+        event.preventDefault();
+    }
+});
+
+// Hide the `#rc-target` element on `mousemove`
     document.addEventListener('mousemove', function (event) {
         var rcTarget = document.getElementById('rc-target');
 
         rcTarget.style.left = rcTarget.style.top = '';
     });
-    ```
+```
 
 After mouseup, the context menu will be displayed for the `#rc-target` element.
 If the user clicks cut/copy/paste, it will relate to the text within the
@@ -152,7 +143,7 @@ element.
 This way, you can have the user copy and paste whatever data you choose from
 anywhere in your web page/app.
 
-<div id="demo-space">
+<div id="demo-space" style="display: none">
     Try right-clicking here to see this working
 </div>
 <input id="rc-target" type="text">
@@ -163,6 +154,7 @@ var rcTarget = document.getElementById('rc-target'),
     demoSpace = document.getElementById('demo-space'),
     index = 0;
 
+demoSpace.style.display = '';
 rcTarget.value = 'text inside textbox';
 
 demoSpace.onmousedown = function (event) {
