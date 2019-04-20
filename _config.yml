@@ -1,11 +1,13 @@
-name        : Here I am
-description : Taye Adeyemi - Programmer · Visionary · Delicious
-baseurl     : /blog
-url         : http://taye.me/blog
-permalink   : pretty
-pygments    : true
-timezone    : Europe/Dublin
+name: Here I am
+description: Taye Adeyemi - Programmer · Visionary · Delicious
+baseurl: /blog
+url: http://taye.me/blog
+permalink: pretty
+hignligher: pygments
+timezone: Europe/Dublin
+plugins: [jekyll-feed]
 
-markdown    : redcarpet
 redcarpet:
-      extensions: [tables, laxed_spacing, fenced_code_blocks, strikethrough, autolink, superscript, no_intra_emphasis, with_toc_data]
+  extensions: [tables, laxed_spacing, fenced_code_blocks, strikethrough, autolink, superscript, no_intra_emphasis, with_toc_data]
+sass:
+  style: compressed

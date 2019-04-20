@@ -11,9 +11,9 @@ google_plus : "107750313581859477605"
         <title>{{ page.title | xml_escape }} | Taye Adeyemi</title>
         <meta name="author" content="{{ page.author }}" />
         <meta name="keywords" content="{{ page.tags | join:' ' }}" />
-    {% if page.description && page.description != "" %}
+    {% if page.description and page.description != "" %}
         <meta name="description" content="{{ page.description }}" />
-    {% elsif page.excerpt  && page.excerpt != ""%}
+    {% elsif page.excerpt and page.excerpt != ""%}
         <meta name="description" content="{{ page.excerpt }}" />
     {% endif %}
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -25,7 +25,7 @@ google_plus : "107750313581859477605"
 
         <!-- Custom CSS -->
         <link rel="stylesheet" href="{{ site.baseurl }}/css/normalize.css"/>
-        <link rel="stylesheet" href="{{ site.baseurl /}}/css/taye.css"/>
+        <link rel="stylesheet" href="{{ site.baseurl }}/css/main.css"/>
         <link rel="icon" href="{{ site.baseurl }}/img/hm-64.png"/>
 
 {% for style in page.styles %}

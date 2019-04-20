@@ -6,12 +6,17 @@ date        : 2013-10-28 02:10:30
 categories  : [interact-js]
 tags        : [interact.js, rubberband, elastic, math, logarithms, exponents]
 excerpt     : "h(x) = a⋅ln(x + a) - a⋅ln(a)"
-scripts     : [asciimathml, underscore, interact, ijs-demo]
-styles      : [math]
+scripts     : [asciimathml, underscore]
 published   : true
 
 ---
-<p> Note: This page requires <b>JavaScript, SVG and MathML</b> (which is currently only supported in <b>Firefox</b> and Opera 9.5-&gt;12)
+<aside>
+  <p>
+  <strong>
+    [Update 2019/04/20]: updated code to use newer interact.js APIs
+  </strong>
+  </p>
+</aside>
 
 <p>When scrolling (or panning) normally, the distance the page is moved relative to the viewport is directly proportional to the dragged distance.</p>
 
@@ -85,10 +90,11 @@ endgraph
 
 <p> Almost there. What's left now is to move the curve downwards by `a * ln(a)`. </p>
 <p class="center-eq">`h(x) = a * ln(x + a) - a * ln(a)`</p>
+<p class="center-eq">`=&gt; h(x) = a * (ln(x + a) - ln(a))`</p>
 agraph
 xmin=-20; xmax=20;
 a = 4;
-plot( a * ln(x + a) - a * ln(a));
+plot( a * (ln(x + a) - ln(a)) );
 plot( x )
 endgraph
 
@@ -101,20 +107,24 @@ endgraph
 <div class="snippet">
 
 {% highlight javascript %}
-paths: [function (x, y) {
+interact.modifiers.snap({
+  targets: [function (x, y) {
     var scale = 50;
 
     return {
-        x: scale * Math.log(x + scale) - scale * Math.log(scale),
-        y: 75,
-        range: Infinity
+      x: scale * Math.log(x + scale) - scale * Math.log(scale),
+      y: 75,
+      range: Infinity
     };
-}]
+  }]
+}
 {% endhighlight %}
 
 </div>
 </div>
 
+<script src="https://unpkg.com/interactjs@next/dist/interact.js"></script>
+<script src="{{ site.baseurl }}/js/ijs-demo.js"></script>
 <script>
 interact(document).on('DOMContentLoaded', setTimeout(function () {
     var siteWidth = parseInt(window.getComputedStyle(document.querySelector('div.site')).width, 10);

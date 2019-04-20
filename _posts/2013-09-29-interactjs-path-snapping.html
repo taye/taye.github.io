@@ -6,11 +6,17 @@ date        : 2013-09-29 15:36:26
 categories  : [interact-js, snap]
 tags        : [interact.js, snap, custom snap, functional, drag-and-drop, drag and drop, draggable, droppable]
 excerpt     : path snapping now lets you set fixed axis origin points or use functions to return the points that the pointer should snap to.
-scripts     : [interact, underscore, ijs-demo]
-styles      : [taye]
 published   : true
 
 ---
+
+<aside>
+  <p>
+  <strong>
+    [Update 2019/04/20]: updated code to use newer interact.js APIs
+  </strong>
+  </p>
+</aside>
 
 <a href="https://github.com/taye/interact.js">interact.js</a> just got even snappier. `path` snapping now lets you set fixed axis origin points or use functions to return the points that the pointer should snap to.
 
@@ -22,10 +28,13 @@ published   : true
 <div class="snippet">
 
 {% highlight javascript %}
-paths: [{
+interact.modifiers.snap({
+  targets: [{
+    x,
     y: 75,
     range: Infinity
-}]
+  }]
+})
 {% endhighlight %}
 
 </div>
@@ -39,12 +48,15 @@ paths: [{
 <div class="snippet">
 
 {% highlight javascript %}
-paths: [function (x, y) {
+interact.modifiers.snap({
+  targets: [(x, y) => {
     return {
+        x,
         y: (75 + 50 * Math.sin(x * 0.04)),
         range: Infinity
     };
-}]
+  }]
+})
 {% endhighlight %}
 
 </div>
@@ -58,54 +70,58 @@ paths: [function (x, y) {
 <div class="snippet">
 
 {% highlight javascript %}
-paths: [function (x, y) {
+interact.modifiers.snap({
+  targets: [(x, y) => {
     return {
         y: x % 100 < 50? 50: 100,
         range: Infinity
     };
-}]
+  }]
+})
 {% endhighlight %}
 
 </div>
 </div>
 
+<script src="https://unpkg.com/interactjs@next/dist/interact.js"></script>
+<script src="{{ site.baseurl }}/js/ijs-demo.js"></script>
 <script>
-    var siteWidth = parseInt(window.getComputedStyle(document.querySelector('div.site')).width, 10);
+  var siteWidth = parseInt(window.getComputedStyle(document.querySelector('div.site')).width, 10);
 
-    window.demos = window.demos || [];
+  window.demos = window.demos || [];
 
-    window.demos.push({
-        pathCanvas: '#sin-path',
-        dragCanvas: '#sin-drag',
-        width: siteWidth,
-        path: function (x, y) {
-            return {
-                y: (75 + 50 * Math.sin(x * 0.04)),
-                range: Infinity
-            };
-        }
-    });
+  window.demos.push({
+    pathCanvas: '#sin-path',
+    dragCanvas: '#sin-drag',
+    width: siteWidth,
+    path: function (x, y) {
+      return {
+        y: (75 + 50 * Math.sin(x * 0.04)),
+        range: Infinity
+      };
+    }
+  });
 
-    window.demos.push({
-        pathCanvas: '#line-path',
-        dragCanvas: '#line-drag',
-        width: siteWidth,
-        path: {
-            y: 75,
-            range: Infinity
-        }
-    });
+  window.demos.push({
+    pathCanvas: '#line-path',
+    dragCanvas: '#line-drag',
+    width: siteWidth,
+    path: {
+      y: 75,
+        range: Infinity
+    }
+  });
 
-    window.demos.push({
-        pathCanvas: '#square-path',
-        dragCanvas: '#square-drag',
-        width: siteWidth,
-        drawInterval: 2,
-        path: function (x, y) {
-            return {
-                y: x % 100 < 50? 50: 100,
-                range: Infinity
-            };
-        }
-    });
+  window.demos.push({
+    pathCanvas: '#square-path',
+    dragCanvas: '#square-drag',
+    width: siteWidth,
+    drawInterval: 2,
+    path: function (x, y) {
+      return {
+        y: x % 100 < 50? 50: 100,
+        range: Infinity
+      };
+    }
+  });
 </script>
