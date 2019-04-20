@@ -25,7 +25,7 @@ pushd $gh_pages_dir &&
   rm -rf blog &&
   mkdir blog &&
   cp -r ../$clean_source/_site/* blog &&
-  cp ../$clean_source/_index.html . &&
+  cp ../$clean_source/_index.html index.html &&
   mv blog/{feed.xml,robots.txt} . &&
   git add -A . &&
   git commit -m "build from $git_rev" &&
