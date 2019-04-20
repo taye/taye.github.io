@@ -6,7 +6,10 @@ permalink: pretty
 hignligher: pygments
 timezone: Europe/Dublin
 markdown: kramdown
-plugins: [jekyll-feed]
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jemoji
 
 sass:
   style: compressed
