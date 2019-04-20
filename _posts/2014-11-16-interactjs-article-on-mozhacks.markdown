@@ -12,4 +12,4 @@ published   : true
 I wrote an article about [interact.js](http://interactjs.io) for the [Mozilla Hacks](https://hacks.mozilla.org/)
 blog. Go read it:
 
-https://hacks.mozilla.org/2014/11/interact-js-for-drag-and-drop-resizing-and-multi-touch-gestures/.
+<https://hacks.mozilla.org/2014/11/interact-js-for-drag-and-drop-resizing-and-multi-touch-gestures/>.

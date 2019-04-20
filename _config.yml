@@ -1,13 +1,12 @@
 name: Here I am
 description: Taye Adeyemi - Programmer · Visionary · Delicious
 baseurl: /blog
-url: http://taye.me/blog
+url: http://taye.me
 permalink: pretty
 hignligher: pygments
 timezone: Europe/Dublin
+markdown: kramdown
 plugins: [jekyll-feed]
 
-redcarpet:
-  extensions: [tables, laxed_spacing, fenced_code_blocks, strikethrough, autolink, superscript, no_intra_emphasis, with_toc_data]
 sass:
   style: compressed
