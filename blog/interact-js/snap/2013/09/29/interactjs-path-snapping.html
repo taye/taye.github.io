@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Path snapping in interact.js | Taye Adeyemi</title>
+        <meta name="author" content="" />
+        <meta name="keywords" content="interact.js snap custom snap functional drag-and-drop drag and drop draggable droppable" />
+    
+        <meta name="description" content="path snapping now lets you set fixed axis origin points or use functions to return the points that the pointer should snap to." />
+    
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+        <link rel="alternate" type="application/rss+xml" href="/blog/rss.xml"/>
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/blog/css/syntax.css"/>
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/blog/css/normalize.css"/>
+        <link rel="stylesheet" href="/blog/css/main.css"/>
+        <link rel="icon" href="/blog/img/hm-64.png"/>
+
+
+
+
+    </head>
+    <body>
+
+        <div class="site">
+          <header>
+              <h1 class="title"><a href="/blog">Here I am</a></h1>
+              <a class="extra" href="/blog">home</a>
+          </header>
+
+          <div class="post-title">
+    <h1> Path snapping in interact.js </h1>
+    <p class="meta">
+        29 Sep 2013
+        <a href="https://twitter.com/share" class="twitter-share-button" data-via="TayeAdeyemi">Tweet</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    </p>
+</div>
+
+<article class="post">
+    <aside>
+  <p>
+  <strong>
+    [Update 2019/04/20]: updated code to use newer interact.js APIs
+  </strong>
+  </p>
+</aside>
+
+<a href="https://github.com/taye/interact.js">interact.js</a> just got even snappier. `path` snapping now lets you set fixed axis origin points or use functions to return the points that the pointer should snap to.
+
+<div class="snap-example">
+<div class="canvas-group">
+<canvas id="line-path"> </canvas>
+<canvas id="line-drag" class="overlay-canvas"> </canvas>
+</div>
+<div class="snippet">
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">interact</span><span class="p">.</span><span class="nx">modifiers</span><span class="p">.</span><span class="nx">snap</span><span class="p">({</span>
+  <span class="na">targets</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="nx">x</span><span class="p">,</span>
+    <span class="na">y</span><span class="p">:</span> <span class="mi">75</span><span class="p">,</span>
+    <span class="na">range</span><span class="p">:</span> <span class="kc">Infinity</span>
+  <span class="p">}]</span>
+<span class="p">})</span></code></pre></figure>
+
+</div>
+</div>
+
+<div class="snap-example">
+<div class="canvas-group">
+<canvas id="sin-path" > </canvas>
+<canvas id="sin-drag" class="overlay-canvas"> </canvas>
+</div>
+<div class="snippet">
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">interact</span><span class="p">.</span><span class="nx">modifiers</span><span class="p">.</span><span class="nx">snap</span><span class="p">({</span>
+  <span class="na">targets</span><span class="p">:</span> <span class="p">[(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="nx">x</span><span class="p">,</span>
+        <span class="na">y</span><span class="p">:</span> <span class="p">(</span><span class="mi">75</span> <span class="o">+</span> <span class="mi">50</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">sin</span><span class="p">(</span><span class="nx">x</span> <span class="o">*</span> <span class="mf">0.04</span><span class="p">)),</span>
+        <span class="na">range</span><span class="p">:</span> <span class="kc">Infinity</span>
+    <span class="p">};</span>
+  <span class="p">}]</span>
+<span class="p">})</span></code></pre></figure>
+
+</div>
+</div>
+
+<div class="snap-example">
+<div class="canvas-group">
+<canvas id="square-path" > </canvas>
+<canvas id="square-drag" class="overlay-canvas"> </canvas>
+</div>
+<div class="snippet">
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">interact</span><span class="p">.</span><span class="nx">modifiers</span><span class="p">.</span><span class="nx">snap</span><span class="p">({</span>
+  <span class="na">targets</span><span class="p">:</span> <span class="p">[(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="na">y</span><span class="p">:</span> <span class="nx">x</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">?</span> <span class="mi">50</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="na">range</span><span class="p">:</span> <span class="kc">Infinity</span>
+    <span class="p">};</span>
+  <span class="p">}]</span>
+<span class="p">})</span></code></pre></figure>
+
+</div>
+</div>
+
+<script src="https://unpkg.com/interactjs@next/dist/interact.js"></script>
+<script src="/blog/js/ijs-demo.js"></script>
+<script>
+  var siteWidth = parseInt(window.getComputedStyle(document.querySelector('div.site')).width, 10);
+
+  window.demos = window.demos || [];
+
+  window.demos.push({
+    pathCanvas: '#sin-path',
+    dragCanvas: '#sin-drag',
+    width: siteWidth,
+    path: function (x, y) {
+      return {
+        y: (75 + 50 * Math.sin(x * 0.04)),
+        range: Infinity
+      };
+    }
+  });
+
+  window.demos.push({
+    pathCanvas: '#line-path',
+    dragCanvas: '#line-drag',
+    width: siteWidth,
+    path: {
+      y: 75,
+        range: Infinity
+    }
+  });
+
+  window.demos.push({
+    pathCanvas: '#square-path',
+    dragCanvas: '#square-drag',
+    width: siteWidth,
+    drawInterval: 2,
+    path: function (x, y) {
+      return {
+        y: x % 100 < 50? 50: 100,
+        range: Infinity
+      };
+    }
+  });
+</script>
+
+</article>
+
+<hr>
+
+
+<div id="related-posts">
+    <h3> You might also like </h3>
+    <ul>
+    
+        <li><a href="/blog/tips/2015/11/16/mouse-drag-outside-iframe/">Receiving mousemove events outside dragged iframe</a></li>
+    
+        <li><a href="/blog/interact-js/2014/11/16/interactjs-article-on-mozhacks/">interact.js on Mozilla Hacks</a></li>
+    
+        <li><a href="/blog/interact.js/svg/2014/08/10/creating-animated-interact-js-logo/">Creating the animated interact.js logo in SVG and SMIL</a></li>
+    
+    </ul>
+</div>
+
+
+
+          <footer>
+            <img id="footer-me" src="/blog/img/hm-64.png" alt="A self portrait">
+            <div class="contact">
+              <p>
+                Taye - Programmer · Visionary · Delicious
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/taye">github.com/taye</a><br/>
+                <a class="email" href="mailto:&#x64;&#x65;&#x76;&#x40;&#x74;&#x61;&#x79;&#x65;&#x2e;&#x6d;&#x65;">
+                    &#x64;&#x65;&#x76;&#x40;&#x74;&#x61;&#x79;&#x65;&#x2e;&#x6d;&#x65;</a><br>
+                <a href="https://plus.google.com/?rel=author">+</a>
+              </p>
+            </div>
+            <a id="cc-license" title="Creative Commons Attribution-ShareAlike" rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" target="_blank">
+                <img src="/blog/img/cc_cc.png" alt="Creative Commons">
+                <img src="/blog/img/cc_by.png" alt="Attribution">
+                <img src="/blog/img/cc_sa.png" alt="ShareAlike">
+            </a>
+          </footer>
+        </div>
+
+
+    </body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Implementing elastic overscroll in JavaScript [Part 1] | Taye Adeyemi</title>
+        <meta name="author" content="" />
+        <meta name="keywords" content="interact.js rubberband elastic math logarithms exponents" />
+    
+        <meta name="description" content="h(x) = a⋅ln(x + a) - a⋅ln(a)" />
+    
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+        <link rel="alternate" type="application/rss+xml" href="/blog/rss.xml"/>
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/blog/css/syntax.css"/>
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/blog/css/normalize.css"/>
+        <link rel="stylesheet" href="/blog/css/main.css"/>
+        <link rel="icon" href="/blog/img/hm-64.png"/>
+
+
+
+        <script src="/blog/js/asciimathml.js"></script>
+        <script src="/blog/js/underscore.js"></script>
+
+    </head>
+    <body>
+
+        <div class="site">
+          <header>
+              <h1 class="title"><a href="/blog">Here I am</a></h1>
+              <a class="extra" href="/blog">home</a>
+          </header>
+
+          <div class="post-title">
+    <h1> Implementing elastic overscroll in JavaScript [Part 1] </h1>
+    <p class="meta">
+        28 Oct 2013
+        <a href="https://twitter.com/share" class="twitter-share-button" data-via="TayeAdeyemi">Tweet</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    </p>
+</div>
+
+<article class="post">
+    <aside>
+  <p>
+  <strong>
+    [Update 2019/04/20]: updated code to use newer interact.js APIs
+  </strong>
+  </p>
+</aside>
+
+<p>When scrolling (or panning) normally, the distance the page is moved relative to the viewport is directly proportional to the dragged distance.</p>
+
+<p class="center-eq">
+`f(x) = x`
+agraph plot( x ) endagraph
+</p>
+
+<p>That is until the edge of the page meets an edge of the viewport. To report to the user that this has occured, the page continues to move but it "resists" the force that the user applies.</p>
+
+<p>When I was thinking of what kind of function I could use to achieve this, I immediately thought "<a href="https://en.wikipedia.org/wiki/Exponential_decay">exponential decay</a>". A few equations later, I realised that I was wrong but close. Then I thought "<a href="https://en.wikipedia.org/wiki/Logarithm">LOGARITHMS!</a>"</p>
+
+<p>if `x` is the horizontal overscroll distance, then the resisted value fed back to the user would be</p>
+
+<p class="center-eq">
+`ln(x)`
+agraph plot( ln(x) ) endgraph
+</p>
+
+<p>... almost. The root of `ln(x)` is not `0` We need a function that meets `f(x) = x` at `(0, 0)` tangentially so that the page's movement is continuous and smooth.
+
+<p class="center-eq">
+`d/dx ln(x) = 1 / x`
+</p>
+<p class="center-eq">
+`1 / x = 1 =&gt; x = 1`
+</p>
+
+<p>
+By adding the solution of `d/dx ln(x) = 1` to the parameter passed to `ln`, we effectively shift the curve to the left so that the slope of the curve is 1 at `x = 0`.
+</p>
+
+<p class="center-eq">
+`ln(x + 1)`
+agraph
+plot( ln(x + 1) )
+plot( x )
+endagraph
+
+But still, the result of `ln(1 + x)` would make for too great a resistance. The obvious solution was to simply multiply by some scalar. That sort of works but the compound curve is no longer continuous.</p>
+
+<p class="center-eq">
+`4 * ln(x + 1)`
+agraph
+xmin=-20; xmax=20;
+plot( 4 * ln(x + 1) );
+plot( f(x) )
+endgraph
+</p>
+
+<p> The "resisted" overscroll would initially be ahead of the actual overscroll for a while before slowing down at the right-most point of intersection in the graph above. </p>
+
+<p>To fix this, we shift the origin to the right so that at `x = 0`, `dy/dx = 1`.</p>
+
+<p class="center-eq">`g(x) = a * ln(x)`</p>
+<p class="center-eq">`g'(x) = a / x`</p>
+<p class="center-eq">`a / x = 1 =&gt; x = a`</p>
+<p class="center-eq">`=&gt; g(x + a)`</p>
+<p class="center-eq">`=&gt; a * ln(x + a)`</p>
+
+<br>
+<p class="center-eq">
+`4 * ln(x + 4)`
+agraph
+xmin=-20; xmax=20;
+a = 4;
+plot( a * ln(x + a) );
+plot( x )
+endgraph
+</p>
+
+<p> Almost there. What's left now is to move the curve downwards by `a * ln(a)`. </p>
+<p class="center-eq">`h(x) = a * ln(x + a) - a * ln(a)`</p>
+<p class="center-eq">`=&gt; h(x) = a * (ln(x + a) - ln(a))`</p>
+agraph
+xmin=-20; xmax=20;
+a = 4;
+plot( a * (ln(x + a) - ln(a)) );
+plot( x )
+endgraph
+
+<div class="snap-example">
+    <h3> Logarithmic resistance with interact.js path snapping </h3>
+<div class="canvas-group">
+<canvas id="elastic-path"> </canvas>
+<canvas id="elastic-drag" class="overlay-canvas"> </canvas>
+</div>
+<div class="snippet">
+
+<figure class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">interact</span><span class="p">.</span><span class="nx">modifiers</span><span class="p">.</span><span class="nx">snap</span><span class="p">({</span>
+  <span class="na">targets</span><span class="p">:</span> <span class="p">[</span><span class="kd">function</span> <span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">scale</span> <span class="o">=</span> <span class="mi">50</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+      <span class="na">x</span><span class="p">:</span> <span class="nx">scale</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">scale</span><span class="p">)</span> <span class="o">-</span> <span class="nx">scale</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">scale</span><span class="p">),</span>
+      <span class="na">y</span><span class="p">:</span> <span class="mi">75</span><span class="p">,</span>
+      <span class="na">range</span><span class="p">:</span> <span class="kc">Infinity</span>
+    <span class="p">};</span>
+  <span class="p">}]</span>
+<span class="p">}</span></code></pre></figure>
+
+</div>
+</div>
+
+<script src="https://unpkg.com/interactjs@next/dist/interact.js"></script>
+<script src="/blog/js/ijs-demo.js"></script>
+<script>
+interact(document).on('DOMContentLoaded', setTimeout(function () {
+    var siteWidth = parseInt(window.getComputedStyle(document.querySelector('div.site')).width, 10);
+    window.demos = window.demos || [];
+
+    new demo.SnapDemo({
+        pathCanvas: '#elastic-path',
+        dragCanvas: '#elastic-drag',
+        width: siteWidth,
+        path: function (x, y) {
+            var scale = 50;
+
+            return {
+                x: scale * Math.log(x + scale) - scale * Math.log(scale),
+                y: 75,
+                range: Infinity
+            };
+        }
+    });
+    }, 1000));
+</script>
+
+</article>
+
+<hr>
+
+
+<div id="related-posts">
+    <h3> You might also like </h3>
+    <ul>
+    
+        <li><a href="/blog/tips/2015/11/16/mouse-drag-outside-iframe/">Receiving mousemove events outside dragged iframe</a></li>
+    
+        <li><a href="/blog/interact-js/2014/11/16/interactjs-article-on-mozhacks/">interact.js on Mozilla Hacks</a></li>
+    
+        <li><a href="/blog/interact.js/svg/2014/08/10/creating-animated-interact-js-logo/">Creating the animated interact.js logo in SVG and SMIL</a></li>
+    
+    </ul>
+</div>
+
+
+
+          <footer>
+            <img id="footer-me" src="/blog/img/hm-64.png" alt="A self portrait">
+            <div class="contact">
+              <p>
+                Taye - Programmer · Visionary · Delicious
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/taye">github.com/taye</a><br/>
+                <a class="email" href="mailto:&#x64;&#x65;&#x76;&#x40;&#x74;&#x61;&#x79;&#x65;&#x2e;&#x6d;&#x65;">
+                    &#x64;&#x65;&#x76;&#x40;&#x74;&#x61;&#x79;&#x65;&#x2e;&#x6d;&#x65;</a><br>
+                <a href="https://plus.google.com/?rel=author">+</a>
+              </p>
+            </div>
+            <a id="cc-license" title="Creative Commons Attribution-ShareAlike" rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" target="_blank">
+                <img src="/blog/img/cc_cc.png" alt="Creative Commons">
+                <img src="/blog/img/cc_by.png" alt="Attribution">
+                <img src="/blog/img/cc_sa.png" alt="ShareAlike">
+            </a>
+          </footer>
+        </div>
+
+
+    </body>
+</html>

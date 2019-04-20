@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Simple web demos with livedemo | Taye Adeyemi</title>
+        <meta name="author" content="" />
+        <meta name="keywords" content="javascript demos" />
+    
+        <meta name="description" content="takes the text out of highlighted <code> snippets and adds elements and CSS to the DOM and executes JS code." />
+    
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+        <link rel="alternate" type="application/rss+xml" href="/blog/rss.xml"/>
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/blog/css/syntax.css"/>
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/blog/css/normalize.css"/>
+        <link rel="stylesheet" href="/blog/css/main.css"/>
+        <link rel="icon" href="/blog/img/hm-64.png"/>
+
+
+
+        <script src="/blog/js/livedemoj.js"></script>
+
+    </head>
+    <body>
+
+        <div class="site">
+          <header>
+              <h1 class="title"><a href="/blog">Here I am</a></h1>
+              <a class="extra" href="/blog">home</a>
+          </header>
+
+          <div class="post-title">
+    <h1> Simple web demos with livedemo </h1>
+    <p class="meta">
+        11 Mar 2014
+        <a href="https://twitter.com/share" class="twitter-share-button" data-via="TayeAdeyemi">Tweet</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    </p>
+</div>
+
+<article class="post">
+    <script src="/projects/livedemo/livedemo.js"></script>
+
+<p><a href="https://github.com/taye/livedemo" title="livedemo on Github">livedemo.js</a> is a small script I wrote to make writing HTML, CSS
+and JavaScript demos easier. It takes the text out of highlighted <code class="highlighter-rouge">&lt;code&gt;</code>
+snippets and adds elements and CSS to the DOM and executes JS code.</p>
+
+<p>I initially wrote it for <a href="http://taye.me/blog/svg/a-guide-to-svg-use-elements/" title="A guide to SVG &lt;use&gt; elements">this blog post</a> and I use it on
+<a href="http://interactjs.io" title="interact.js drag, drop, resize, gesture">interactjs.io</a>.</p>
+
+<h2 id="use-it">Use it</h2>
+<ol>
+  <li>
+    <p>Add a comment that contains the text <code class="highlighter-rouge">enable javascript</code> as the first,
+unindented line in code that you want to demo.</p>
+  </li>
+  <li>
+    <p>Highlight code in your HTML page with something like
+<a href="https://github.com/vmg/redcarpet" title="The safe Markdown parser, reloaded"><em>redcarpet</em></a> or <a href="http://pygments.org" title="Python syntax highlighter"><em>Pygments</em></a> (both available in
+<a href="http://jekyllrb.com" title="Simple, blog-aware, static sites"><em>Jekyll</em></a>) or <a href="http://prismjs.com" title="A lightweight, extensible syntax highlighter"><em>Prism</em></a>.</p>
+  </li>
+  <li>
+    <p><a href="https://raw2.github.com/taye/livedemo/master/livedemo.min.js" title="minified script">Download</a> and include the script somewhere in your HTML page:
+<code class="highlighter-rouge">&lt;script src="livedemo.min.js"&gt;&lt;/script&gt;</code> (after Prisim if you’re using it).</p>
+  </li>
+</ol>
+
+<hr />
+
+<h2 id="html">HTML</h2>
+<p>Code elements matching the <code class="highlighter-rouge">HTMLSelector</code> and whose first <code class="highlighter-rouge">textNode</code>’s
+<code class="highlighter-rouge">textContent</code> match the <code class="highlighter-rouge">HTMLFlag</code> RegExp will be demo’d.</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!-- enable javascript to view a demo --&gt;</span>
+<span class="nt">&lt;svg</span> <span class="na">id=</span><span class="s">"demo-svg"</span> <span class="na">viewBox=</span><span class="s">"0 -50 400 100"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;polygon</span> <span class="na">points=</span><span class="s">"80 -40, 120 40, 40 40"</span> <span class="na">fill=</span><span class="s">"#29e"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;rect</span> <span class="na">height=</span><span class="s">"80"</span> <span class="na">width=</span><span class="s">"80"</span> <span class="na">y=</span><span class="s">"-40"</span> <span class="na">x=</span><span class="s">"160"</span> <span class="na">fill=</span><span class="s">"#4e4"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;circle</span> <span class="na">cx=</span><span class="s">"320"</span> <span class="na">cy=</span><span class="s">"0"</span> <span class="na">r=</span><span class="s">"40"</span> <span class="na">fill=</span><span class="s">"#f40"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/svg&gt;</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">&lt;!-- enable javascript to view a demo --&gt;</code> will be noticed by <em>livedemo</em>. The
+comment is removed and the remaining content is inserted into the document
+beside the code element’s parent’s parent by default.</p>
+
+<p>If for example the HTML on the page is</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;div&gt;</span>
+    <span class="nt">&lt;pre&gt;</span>
+        <span class="nt">&lt;code</span> <span class="na">class=</span><span class="s">"language-html"</span><span class="nt">&gt;</span>
+            ... the generated highlighted code ...
+        <span class="nt">&lt;/code&gt;</span>
+    <span class="nt">&lt;pre&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+</code></pre></div></div>
+
+<p>then the textContent of the <code class="highlighter-rouge">&lt;code&gt;</code> will be inserted after the <code class="highlighter-rouge">&lt;/div&gt;</code> within
+a new <code class="highlighter-rouge">div.live-demo</code> element.</p>
+
+<p>This makes it convenient for <em>Jekyll</em> sites using <em>redcarpet</em> or <em>Pygments</em>.</p>
+
+<h2 id="css">CSS</h2>
+<p>The text of code elements that match the <code class="highlighter-rouge">CSSSelector</code> and have <code class="highlighter-rouge">firstChild</code>ren
+that match the <code class="highlighter-rouge">CSSFlag</code> RegExp will be added to <code class="highlighter-rouge">document.head</code> in <code class="highlighter-rouge">&lt;script&gt;</code>
+tags.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* enable javascript to vew demo */</span>
+<span class="nf">#demo-svg</span> <span class="p">{</span>
+    <span class="nl">width</span><span class="p">:</span> <span class="m">100%</span><span class="p">;</span>
+    <span class="nl">height</span><span class="p">:</span> <span class="m">25%</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="javascript">JavaScript</h2>
+<p>Elements that match the <code class="highlighter-rouge">JSSelector</code> and whose <code class="highlighter-rouge">firstChild</code>’s <code class="highlighter-rouge">textContent</code>
+matches the <code class="highlighter-rouge">JSFlag</code> RegExp will have their text executed.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// please enable javascript</span>
+<span class="kd">var</span> <span class="nx">demoSvg</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'demo-svg'</span><span class="p">);</span>
+
+<span class="nx">demoSvg</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'click'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">alert</span><span class="p">(</span><span class="s1">'click on &lt;'</span> <span class="o">+</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">nodeName</span> <span class="o">+</span> <span class="s1">'&gt;'</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>The script above will be executed and the flag comment will be removed form the
+<code class="highlighter-rouge">&lt;code&gt;</code> block.</p>
+
+<p>JavaScript code is executed after HTML and CSS is inserted into the document.
+If the execution of a code block throws an error, the element and error are
+logged to the console.</p>
+
+<h2 id="configuration">Configuration</h2>
+<p>The properties of the object <code class="highlighter-rouge">window.liveDemoSettings</code> are used to change
+settings for <em>livedemo</em> if they are set before the <code class="highlighter-rouge">DOMContentLoaded</code> event
+occurs and calls <code class="highlighter-rouge">window.liveDemo</code>. The properties are:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">HTMLSelector</code>, <code class="highlighter-rouge">JSSelector</code>, <code class="highlighter-rouge">CSSSelector</code>: Elements matching these CSS
+selectors will be checked for HTMLFlag, CSSFlag and JSFlag respectively. The
+default values are:
+    <ul>
+      <li>HTML:
+<code class="highlighter-rouge">'code.language-xml,code.language-html,code.language-markup,code.xml,code.html'</code></li>
+      <li>CSS : <code class="highlighter-rouge">'code.language-css,code.css'</code></li>
+      <li>JS  :<code class="highlighter-rouge">'code.language-javascript,code.javascript'</code></li>
+    </ul>
+  </li>
+  <li><code class="highlighter-rouge">HTMLFlag</code>, <code class="highlighter-rouge">CSSFlag</code>, <code class="highlighter-rouge">JSFlag</code>: If the <code class="highlighter-rouge">textContent</code>s of the
+<code class="highlighter-rouge">firstChild</code>ren of the elements matching the respective selectors passes a
+test for this RegExp, they are processed as HTML, CSS or JavaScript. The
+default values are:
+    <ul>
+      <li>HTML: <code class="highlighter-rouge">/^&lt;!--.*enable javascript.*--&gt;/</code></li>
+      <li>CSS : <code class="highlighter-rouge">/^\/\*.*enable javascript.*\*\//</code></li>
+      <li>JS  : <code class="highlighter-rouge">/^\/\/.*enable javascript.*|^\/\*.*enable javascript.*\*\//</code></li>
+    </ul>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">codeElementDepth</code>: How much lower in the DOM tree the <code class="highlighter-rouge">&lt;code&gt;</code> elements are
+than the level you want demo HTML <code class="highlighter-rouge">div.live-demo</code>s to be inserted. Default
+is <code class="highlighter-rouge">2</code> as explained in the “HTML” section of this document.</p>
+  </li>
+  <li><code class="highlighter-rouge">insertPosition</code>: The position to insert <code class="highlighter-rouge">div.live-demo</code>s relative to the
+element that is <code class="highlighter-rouge">codeElementDepth</code> levels up from the <code class="highlighter-rouge">&lt;code&gt;</code> element. The
+default value is <code class="highlighter-rouge">'afterend'</code>. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element.insertAdjacentHTML#Visualization_of_position_names" title="Visualization of position names">Element.insertAdjacentHTML</a>
+for other values.</li>
+</ul>
+
+<h2 id="license">License</h2>
+<p><a href="http://taye.mit-license.org/" title="copy of the MIT license">MIT</a></p>
+
+
+</article>
+
+<hr>
+
+
+<div id="related-posts">
+    <h3> You might also like </h3>
+    <ul>
+    
+        <li><a href="/blog/tips/2015/11/16/mouse-drag-outside-iframe/">Receiving mousemove events outside dragged iframe</a></li>
+    
+        <li><a href="/blog/interact-js/2014/11/16/interactjs-article-on-mozhacks/">interact.js on Mozilla Hacks</a></li>
+    
+        <li><a href="/blog/interact.js/svg/2014/08/10/creating-animated-interact-js-logo/">Creating the animated interact.js logo in SVG and SMIL</a></li>
+    
+    </ul>
+</div>
+
+
+
+          <footer>
+            <img id="footer-me" src="/blog/img/hm-64.png" alt="A self portrait">
+            <div class="contact">
+              <p>
+                Taye - Programmer · Visionary · Delicious
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/taye">github.com/taye</a><br/>
+                <a class="email" href="mailto:&#x64;&#x65;&#x76;&#x40;&#x74;&#x61;&#x79;&#x65;&#x2e;&#x6d;&#x65;">
+                    &#x64;&#x65;&#x76;&#x40;&#x74;&#x61;&#x79;&#x65;&#x2e;&#x6d;&#x65;</a><br>
+                <a href="https://plus.google.com/?rel=author">+</a>
+              </p>
+            </div>
+            <a id="cc-license" title="Creative Commons Attribution-ShareAlike" rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" target="_blank">
+                <img src="/blog/img/cc_cc.png" alt="Creative Commons">
+                <img src="/blog/img/cc_by.png" alt="Attribution">
+                <img src="/blog/img/cc_sa.png" alt="ShareAlike">
+            </a>
+          </footer>
+        </div>
+
+
+    </body>
+</html>

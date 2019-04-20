@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Creating the animated interact.js logo in SVG and SMIL | Taye Adeyemi</title>
+        <meta name="author" content="" />
+        <meta name="keywords" content="interact.js logo design svg smil animation" />
+    
+        <meta name="description" content="Two of the three animated Δs start at full opacity and fade out while scaling up from 1 to 25 in 10 seconds and from 0 to 15 in 7 seconds. The other fades in and then out while scaling down from 15 to 1 in 13 seconds." />
+    
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+        <link rel="alternate" type="application/rss+xml" href="/blog/rss.xml"/>
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/blog/css/syntax.css"/>
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/blog/css/normalize.css"/>
+        <link rel="stylesheet" href="/blog/css/main.css"/>
+        <link rel="icon" href="/blog/img/hm-64.png"/>
+
+
+
+
+    </head>
+    <body>
+
+        <div class="site">
+          <header>
+              <h1 class="title"><a href="/blog">Here I am</a></h1>
+              <a class="extra" href="/blog">home</a>
+          </header>
+
+          <div class="post-title">
+    <h1> Creating the animated interact.js logo in SVG and SMIL </h1>
+    <p class="meta">
+        10 Aug 2014
+        <a href="https://twitter.com/share" class="twitter-share-button" data-via="TayeAdeyemi">Tweet</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    </p>
+</div>
+
+<article class="post">
+    <p><a href="//interactjs.io">interact.js</a> is a javascript project that I started for responding to
+single and multi-pointer drags and gestures. The logo for the project is this:</p>
+
+<p><img src="/blog/img/ijs-anim.svg" style="width: 100%; max-height: 5em;" /></p>
+
+<p>The static graphics were created in <a href="http://inkscape.org">Inkscape</a> and then animated
+manually with <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/SVG_animation_with_SMIL" title="SVG animation with SMIL">SMIL</a>.</p>
+
+<h2 id="designing-in-inkscape">Designing in Inkscape</h2>
+
+<p>I started with the idea of “interact.js” written plainly with a dotted line
+joining the dots of the “i” and “j”. This was boring so I thought about making
+the line look a bit like something from an ECG. That wasn’t great either but I
+liked the angles in the lines I was drawing and decided that I would use the
+letter delta (Δ) since dragging is all about deltas.</p>
+
+<p><img src="/blog/img/ijs-design/1.png" style="max-height: 5em; display: block; margin: auto" /></p>
+
+<p>I tried a few things including making incomplete, tessellating delta symbols
+with both the “a” and “c” but that really wasn’t great. Finally, I removed the
+dotted line and replaced only the “a” with a regular looking “Δ”. I liked this
+because it could easily be read as “interact.js” and the Δ was roughly in the
+middle.</p>
+
+<p><img src="/blog/img/ijs-design/5.png" style="max-height: 5em; display: block; margin: auto" /></p>
+
+<p>Next, I adjusted the kerning of all the characters so that the inner triangle
+of the Δ was right in the middle. Pleased was I. However, I wouldn’t be
+satisfied until it was nicely animated.</p>
+
+<h2 id="animating-in-vim">Animating in Vim</h2>
+
+<p>I tidied the markup manually and moved the Δ into a <code class="highlighter-rouge">&lt;defs&gt;</code> element and
+referenced it in <a href="/blog/svg/a-guide-to-svg-use-elements" title="A guide to SVG &lt;use&gt; elements"><code class="highlighter-rouge">&lt;use&gt;</code> elements</a> then brought the regular text to
+the front of the drawing and made it white. The Δs inherit their <code class="highlighter-rouge">fill-color</code>
+from the <code class="highlighter-rouge">&lt;svg&gt;</code> root element whose <code class="highlighter-rouge">fill-color</code> is animated from blue to green
+to reddish-orange and to blue again.</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;animate</span> <span class="na">id=</span><span class="s">"colors"</span>
+    <span class="na">attributeName=</span><span class="s">"fill"</span>
+    <span class="na">values=</span><span class="s">"#29e;#29e;#4e4;#4e4;#f40;#f40;#29e;#29e"</span>
+    <span class="na">dur=</span><span class="s">"16s"</span>
+    <span class="na">repeatCount=</span><span class="s">"indefinite"</span><span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<p>One Δ remains fixed in the middle while the other three have two animations
+each – one to change their scale and another to fade in/out.</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;use</span> <span class="na">x=</span><span class="s">"0"</span> <span class="na">y=</span><span class="s">"0"</span> <span class="na">transform=</span><span class="s">"translate(255.81,65.6775)"</span> <span class="na">opacity=</span><span class="s">"0"</span> <span class="na">xlink:href=</span><span class="s">"#a-delta"</span><span class="nt">&gt;</span>
+     <span class="nt">&lt;animateTransform</span> <span class="na">attributeName=</span><span class="s">"transform"</span> 
+         <span class="na">attributeType=</span><span class="s">"XML"</span>
+         <span class="na">type=</span><span class="s">"scale"</span> 
+         <span class="na">values=</span><span class="s">"1; 25"</span>
+         <span class="na">dur=</span><span class="s">"10s"</span>
+         <span class="na">additive=</span><span class="s">"sum"</span>
+         <span class="na">repeatCount=</span><span class="s">"indefinite"</span><span class="nt">/&gt;</span>
+     <span class="nt">&lt;animate</span> <span class="na">attributeName=</span><span class="s">"opacity"</span>
+        <span class="na">values=</span><span class="s">"1; 0"</span>
+        <span class="na">dur=</span><span class="s">"10s"</span>
+        <span class="na">repeatCount=</span><span class="s">"indefinite"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/use&gt;</span>
+</code></pre></div></div>
+
+<p>Two of the three animated Δs start at full opacity and fade out while scaling
+up from 1 to 25 in 10 seconds and from 0 to 15 in 7 seconds. The other fades in
+and then out while scaling down from 15 to 1 in 13 seconds.</p>
+
+<p>The different parameters of the animations and the asymmetry of the Δ result in
+a hypnotic, “parallaxy” look which I’m very happy with. On the project
+<a href="//interactjs.io">homepage</a>, I placed the animated logo in front of a black background so
+that the text can be read easily with or without the animation. The animated
+logo also sits proudly in the project’s <a href="https://github.com/taye/interact.js#readme">README on Github</a> with a
+white background.</p>
+
+
+</article>
+
+<hr>
+
+
+<div id="related-posts">
+    <h3> You might also like </h3>
+    <ul>
+    
+        <li><a href="/blog/tips/2015/11/16/mouse-drag-outside-iframe/">Receiving mousemove events outside dragged iframe</a></li>
+    
+        <li><a href="/blog/interact-js/2014/11/16/interactjs-article-on-mozhacks/">interact.js on Mozilla Hacks</a></li>
+    
+        <li><a href="/blog/javascript/2014/03/11/introducing-livedemo/">Simple web demos with livedemo</a></li>
+    
+    </ul>
+</div>
+
+
+
+          <footer>
+            <img id="footer-me" src="/blog/img/hm-64.png" alt="A self portrait">
+            <div class="contact">
+              <p>
+                Taye - Programmer · Visionary · Delicious
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/taye">github.com/taye</a><br/>
+                <a class="email" href="mailto:&#x64;&#x65;&#x76;&#x40;&#x74;&#x61;&#x79;&#x65;&#x2e;&#x6d;&#x65;">
+                    &#x64;&#x65;&#x76;&#x40;&#x74;&#x61;&#x79;&#x65;&#x2e;&#x6d;&#x65;</a><br>
+                <a href="https://plus.google.com/?rel=author">+</a>
+              </p>
+            </div>
+            <a id="cc-license" title="Creative Commons Attribution-ShareAlike" rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" target="_blank">
+                <img src="/blog/img/cc_cc.png" alt="Creative Commons">
+                <img src="/blog/img/cc_by.png" alt="Attribution">
+                <img src="/blog/img/cc_sa.png" alt="ShareAlike">
+            </a>
+          </footer>
+        </div>
+
+
+    </body>
+</html>

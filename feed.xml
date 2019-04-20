@@ -1,0 +1,837 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://taye.me/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://taye.me/blog/" rel="alternate" type="text/html" /><updated>2019-04-20T23:59:42+01:00</updated><id>http://taye.me/blog/feed.xml</id><title type="html">Here I am</title><subtitle>Taye Adeyemi - Programmer · Visionary · Delicious</subtitle><entry><title type="html">Receiving mousemove events outside dragged iframe</title><link href="http://taye.me/blog/tips/2015/11/16/mouse-drag-outside-iframe/" rel="alternate" type="text/html" title="Receiving mousemove events outside dragged iframe" /><published>2015-11-16T01:15:00+00:00</published><updated>2015-11-16T01:15:00+00:00</updated><id>http://taye.me/blog/tips/2015/11/16/mouse-drag-outside-iframe</id><content type="html" xml:base="http://taye.me/blog/tips/2015/11/16/mouse-drag-outside-iframe/">&lt;p&gt;You have an iframe that contains draggable elements. You want dragging of these
+elements to continue even if the mouse pointer moves outside the iframe and
+over the parent document. You want the dragging to end when the mouse is
+released while the pointer is outside the iframe. You could try adding event
+listeners to the parent document, but that’s not possible when the two
+documents have differnt origins. What do you do?&lt;/p&gt;
+
+&lt;p&gt;Don’t call &lt;code class=&quot;highlighter-rouge&quot;&gt;preventDefault&lt;/code&gt; on the &lt;code class=&quot;highlighter-rouge&quot;&gt;mousedown&lt;/code&gt; event.&lt;/p&gt;
+
+&lt;p&gt;If the default behaviour isn’t prevented on &lt;code class=&quot;highlighter-rouge&quot;&gt;mousedown&lt;/code&gt;, then when the mouse is
+moved outside the iframe and over the parent document, the document in the
+iframe will continue to recieve &lt;code class=&quot;highlighter-rouge&quot;&gt;mousemove&lt;/code&gt; events.&lt;/p&gt;</content><author><name></name></author><category term="mouse" /><category term="events" /><category term="preventDefault" /><category term="iframe" /><summary type="html">Don't call preventDefault on the mousedown event</summary></entry><entry><title type="html">interact.js on Mozilla Hacks</title><link href="http://taye.me/blog/interact-js/2014/11/16/interactjs-article-on-mozhacks/" rel="alternate" type="text/html" title="interact.js on Mozilla Hacks" /><published>2014-11-16T12:56:20+00:00</published><updated>2014-11-16T12:56:20+00:00</updated><id>http://taye.me/blog/interact-js/2014/11/16/interactjs-article-on-mozhacks</id><content type="html" xml:base="http://taye.me/blog/interact-js/2014/11/16/interactjs-article-on-mozhacks/">&lt;p&gt;I wrote an article about &lt;a href=&quot;http://interactjs.io&quot;&gt;interact.js&lt;/a&gt; for the &lt;a href=&quot;https://hacks.mozilla.org/&quot;&gt;Mozilla Hacks&lt;/a&gt;
+blog. Go read it:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://hacks.mozilla.org/2014/11/interact-js-for-drag-and-drop-resizing-and-multi-touch-gestures/&quot;&gt;https://hacks.mozilla.org/2014/11/interact-js-for-drag-and-drop-resizing-and-multi-touch-gestures/&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="interact.js" /><category term="mozhacks" /><category term="mozilla hacks" /><summary type="html">I wrote an article about interact.js for the Mozilla Hacks blog</summary></entry><entry><title type="html">Creating the animated interact.js logo in SVG and SMIL</title><link href="http://taye.me/blog/interact.js/svg/2014/08/10/creating-animated-interact-js-logo/" rel="alternate" type="text/html" title="Creating the animated interact.js logo in SVG and SMIL" /><published>2014-08-10T15:15:50+01:00</published><updated>2014-08-10T15:15:50+01:00</updated><id>http://taye.me/blog/interact.js/svg/2014/08/10/creating-animated-interact-js-logo</id><content type="html" xml:base="http://taye.me/blog/interact.js/svg/2014/08/10/creating-animated-interact-js-logo/">&lt;p&gt;&lt;a href=&quot;//interactjs.io&quot;&gt;interact.js&lt;/a&gt; is a javascript project that I started for responding to
+single and multi-pointer drags and gestures. The logo for the project is this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/img/ijs-anim.svg&quot; style=&quot;width: 100%; max-height: 5em;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The static graphics were created in &lt;a href=&quot;http://inkscape.org&quot;&gt;Inkscape&lt;/a&gt; and then animated
+manually with &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/SVG/SVG_animation_with_SMIL&quot; title=&quot;SVG animation with SMIL&quot;&gt;SMIL&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;designing-in-inkscape&quot;&gt;Designing in Inkscape&lt;/h2&gt;
+
+&lt;p&gt;I started with the idea of “interact.js” written plainly with a dotted line
+joining the dots of the “i” and “j”. This was boring so I thought about making
+the line look a bit like something from an ECG. That wasn’t great either but I
+liked the angles in the lines I was drawing and decided that I would use the
+letter delta (Δ) since dragging is all about deltas.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/img/ijs-design/1.png&quot; style=&quot;max-height: 5em; display: block; margin: auto&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I tried a few things including making incomplete, tessellating delta symbols
+with both the “a” and “c” but that really wasn’t great. Finally, I removed the
+dotted line and replaced only the “a” with a regular looking “Δ”. I liked this
+because it could easily be read as “interact.js” and the Δ was roughly in the
+middle.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/blog/img/ijs-design/5.png&quot; style=&quot;max-height: 5em; display: block; margin: auto&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Next, I adjusted the kerning of all the characters so that the inner triangle
+of the Δ was right in the middle. Pleased was I. However, I wouldn’t be
+satisfied until it was nicely animated.&lt;/p&gt;
+
+&lt;h2 id=&quot;animating-in-vim&quot;&gt;Animating in Vim&lt;/h2&gt;
+
+&lt;p&gt;I tidied the markup manually and moved the Δ into a &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;defs&amp;gt;&lt;/code&gt; element and
+referenced it in &lt;a href=&quot;/blog/svg/a-guide-to-svg-use-elements&quot; title=&quot;A guide to SVG &amp;lt;use&amp;gt; elements&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt; elements&lt;/a&gt; then brought the regular text to
+the front of the drawing and made it white. The Δs inherit their &lt;code class=&quot;highlighter-rouge&quot;&gt;fill-color&lt;/code&gt;
+from the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;svg&amp;gt;&lt;/code&gt; root element whose &lt;code class=&quot;highlighter-rouge&quot;&gt;fill-color&lt;/code&gt; is animated from blue to green
+to reddish-orange and to blue again.&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;animate&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;colors&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;attributeName=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;fill&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;values=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#29e;#29e;#4e4;#4e4;#f40;#f40;#29e;#29e&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;dur=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;16s&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;repeatCount=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;indefinite&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;One Δ remains fixed in the middle while the other three have two animations
+each – one to change their scale and another to fade in/out.&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;x=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;y=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(255.81,65.6775)&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;opacity=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#a-delta&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+     &lt;span class=&quot;nt&quot;&gt;&amp;lt;animateTransform&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;attributeName=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;transform&quot;&lt;/span&gt; 
+         &lt;span class=&quot;na&quot;&gt;attributeType=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;XML&quot;&lt;/span&gt;
+         &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;scale&quot;&lt;/span&gt; 
+         &lt;span class=&quot;na&quot;&gt;values=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;1; 25&quot;&lt;/span&gt;
+         &lt;span class=&quot;na&quot;&gt;dur=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;10s&quot;&lt;/span&gt;
+         &lt;span class=&quot;na&quot;&gt;additive=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;sum&quot;&lt;/span&gt;
+         &lt;span class=&quot;na&quot;&gt;repeatCount=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;indefinite&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+     &lt;span class=&quot;nt&quot;&gt;&amp;lt;animate&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;attributeName=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;opacity&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;values=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;1; 0&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;dur=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;10s&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;repeatCount=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;indefinite&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/use&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Two of the three animated Δs start at full opacity and fade out while scaling
+up from 1 to 25 in 10 seconds and from 0 to 15 in 7 seconds. The other fades in
+and then out while scaling down from 15 to 1 in 13 seconds.&lt;/p&gt;
+
+&lt;p&gt;The different parameters of the animations and the asymmetry of the Δ result in
+a hypnotic, “parallaxy” look which I’m very happy with. On the project
+&lt;a href=&quot;//interactjs.io&quot;&gt;homepage&lt;/a&gt;, I placed the animated logo in front of a black background so
+that the text can be read easily with or without the animation. The animated
+logo also sits proudly in the project’s &lt;a href=&quot;https://github.com/taye/interact.js#readme&quot;&gt;README on Github&lt;/a&gt; with a
+white background.&lt;/p&gt;</content><author><name></name></author><category term="interact.js" /><category term="logo" /><category term="design" /><category term="svg" /><category term="smil" /><category term="animation" /><summary type="html">Two of the three animated Δs start at full opacity and fade out while scaling up from 1 to 25 in 10 seconds and from 0 to 15 in 7 seconds. The other fades in and then out while scaling down from 15 to 1 in 13 seconds.</summary></entry><entry><title type="html">Simple web demos with livedemo</title><link href="http://taye.me/blog/javascript/2014/03/11/introducing-livedemo/" rel="alternate" type="text/html" title="Simple web demos with livedemo" /><published>2014-03-11T00:57:11+00:00</published><updated>2014-03-11T00:57:11+00:00</updated><id>http://taye.me/blog/javascript/2014/03/11/introducing-livedemo</id><content type="html" xml:base="http://taye.me/blog/javascript/2014/03/11/introducing-livedemo/">&lt;script src=&quot;/projects/livedemo/livedemo.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/taye/livedemo&quot; title=&quot;livedemo on Github&quot;&gt;livedemo.js&lt;/a&gt; is a small script I wrote to make writing HTML, CSS
+and JavaScript demos easier. It takes the text out of highlighted &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;code&amp;gt;&lt;/code&gt;
+snippets and adds elements and CSS to the DOM and executes JS code.&lt;/p&gt;
+
+&lt;p&gt;I initially wrote it for &lt;a href=&quot;http://taye.me/blog/svg/a-guide-to-svg-use-elements/&quot; title=&quot;A guide to SVG &amp;lt;use&amp;gt; elements&quot;&gt;this blog post&lt;/a&gt; and I use it on
+&lt;a href=&quot;http://interactjs.io&quot; title=&quot;interact.js drag, drop, resize, gesture&quot;&gt;interactjs.io&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;use-it&quot;&gt;Use it&lt;/h2&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Add a comment that contains the text &lt;code class=&quot;highlighter-rouge&quot;&gt;enable javascript&lt;/code&gt; as the first,
+unindented line in code that you want to demo.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Highlight code in your HTML page with something like
+&lt;a href=&quot;https://github.com/vmg/redcarpet&quot; title=&quot;The safe Markdown parser, reloaded&quot;&gt;&lt;em&gt;redcarpet&lt;/em&gt;&lt;/a&gt; or &lt;a href=&quot;http://pygments.org&quot; title=&quot;Python syntax highlighter&quot;&gt;&lt;em&gt;Pygments&lt;/em&gt;&lt;/a&gt; (both available in
+&lt;a href=&quot;http://jekyllrb.com&quot; title=&quot;Simple, blog-aware, static sites&quot;&gt;&lt;em&gt;Jekyll&lt;/em&gt;&lt;/a&gt;) or &lt;a href=&quot;http://prismjs.com&quot; title=&quot;A lightweight, extensible syntax highlighter&quot;&gt;&lt;em&gt;Prism&lt;/em&gt;&lt;/a&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;a href=&quot;https://raw2.github.com/taye/livedemo/master/livedemo.min.js&quot; title=&quot;minified script&quot;&gt;Download&lt;/a&gt; and include the script somewhere in your HTML page:
+&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;script src=&quot;livedemo.min.js&quot;&amp;gt;&amp;lt;/script&amp;gt;&lt;/code&gt; (after Prisim if you’re using it).&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;html&quot;&gt;HTML&lt;/h2&gt;
+&lt;p&gt;Code elements matching the &lt;code class=&quot;highlighter-rouge&quot;&gt;HTMLSelector&lt;/code&gt; and whose first &lt;code class=&quot;highlighter-rouge&quot;&gt;textNode&lt;/code&gt;’s
+&lt;code class=&quot;highlighter-rouge&quot;&gt;textContent&lt;/code&gt; match the &lt;code class=&quot;highlighter-rouge&quot;&gt;HTMLFlag&lt;/code&gt; RegExp will be demo’d.&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- enable javascript to view a demo --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;svg&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;demo-svg&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;viewBox=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0 -50 400 100&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;polygon&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;points=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;80 -40, 120 40, 40 40&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#29e&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;rect&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;80&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;80&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;y=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;-40&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;x=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;160&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#4e4&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;circle&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;cx=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;320&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;cy=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;r=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;40&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#f40&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/svg&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;!-- enable javascript to view a demo --&amp;gt;&lt;/code&gt; will be noticed by &lt;em&gt;livedemo&lt;/em&gt;. The
+comment is removed and the remaining content is inserted into the document
+beside the code element’s parent’s parent by default.&lt;/p&gt;
+
+&lt;p&gt;If for example the HTML on the page is&lt;/p&gt;
+
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;pre&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;code&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;language-html&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+            ... the generated highlighted code ...
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;/code&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;pre&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;then the textContent of the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;code&amp;gt;&lt;/code&gt; will be inserted after the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;/div&amp;gt;&lt;/code&gt; within
+a new &lt;code class=&quot;highlighter-rouge&quot;&gt;div.live-demo&lt;/code&gt; element.&lt;/p&gt;
+
+&lt;p&gt;This makes it convenient for &lt;em&gt;Jekyll&lt;/em&gt; sites using &lt;em&gt;redcarpet&lt;/em&gt; or &lt;em&gt;Pygments&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;css&quot;&gt;CSS&lt;/h2&gt;
+&lt;p&gt;The text of code elements that match the &lt;code class=&quot;highlighter-rouge&quot;&gt;CSSSelector&lt;/code&gt; and have &lt;code class=&quot;highlighter-rouge&quot;&gt;firstChild&lt;/code&gt;ren
+that match the &lt;code class=&quot;highlighter-rouge&quot;&gt;CSSFlag&lt;/code&gt; RegExp will be added to &lt;code class=&quot;highlighter-rouge&quot;&gt;document.head&lt;/code&gt; in &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;script&amp;gt;&lt;/code&gt;
+tags.&lt;/p&gt;
+
+&lt;div class=&quot;language-css highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;/* enable javascript to vew demo */&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;#demo-svg&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;width&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;100%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;height&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;25%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;javascript&quot;&gt;JavaScript&lt;/h2&gt;
+&lt;p&gt;Elements that match the &lt;code class=&quot;highlighter-rouge&quot;&gt;JSSelector&lt;/code&gt; and whose &lt;code class=&quot;highlighter-rouge&quot;&gt;firstChild&lt;/code&gt;’s &lt;code class=&quot;highlighter-rouge&quot;&gt;textContent&lt;/code&gt;
+matches the &lt;code class=&quot;highlighter-rouge&quot;&gt;JSFlag&lt;/code&gt; RegExp will have their text executed.&lt;/p&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// please enable javascript&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;demoSvg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getElementById&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'demo-svg'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;demoSvg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'click'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;alert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'click on &amp;lt;'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nodeName&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&amp;gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The script above will be executed and the flag comment will be removed form the
+&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;code&amp;gt;&lt;/code&gt; block.&lt;/p&gt;
+
+&lt;p&gt;JavaScript code is executed after HTML and CSS is inserted into the document.
+If the execution of a code block throws an error, the element and error are
+logged to the console.&lt;/p&gt;
+
+&lt;h2 id=&quot;configuration&quot;&gt;Configuration&lt;/h2&gt;
+&lt;p&gt;The properties of the object &lt;code class=&quot;highlighter-rouge&quot;&gt;window.liveDemoSettings&lt;/code&gt; are used to change
+settings for &lt;em&gt;livedemo&lt;/em&gt; if they are set before the &lt;code class=&quot;highlighter-rouge&quot;&gt;DOMContentLoaded&lt;/code&gt; event
+occurs and calls &lt;code class=&quot;highlighter-rouge&quot;&gt;window.liveDemo&lt;/code&gt;. The properties are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;HTMLSelector&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;JSSelector&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;CSSSelector&lt;/code&gt;: Elements matching these CSS
+selectors will be checked for HTMLFlag, CSSFlag and JSFlag respectively. The
+default values are:
+    &lt;ul&gt;
+      &lt;li&gt;HTML:
+&lt;code class=&quot;highlighter-rouge&quot;&gt;'code.language-xml,code.language-html,code.language-markup,code.xml,code.html'&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;CSS : &lt;code class=&quot;highlighter-rouge&quot;&gt;'code.language-css,code.css'&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;JS  :&lt;code class=&quot;highlighter-rouge&quot;&gt;'code.language-javascript,code.javascript'&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;HTMLFlag&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;CSSFlag&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;JSFlag&lt;/code&gt;: If the &lt;code class=&quot;highlighter-rouge&quot;&gt;textContent&lt;/code&gt;s of the
+&lt;code class=&quot;highlighter-rouge&quot;&gt;firstChild&lt;/code&gt;ren of the elements matching the respective selectors passes a
+test for this RegExp, they are processed as HTML, CSS or JavaScript. The
+default values are:
+    &lt;ul&gt;
+      &lt;li&gt;HTML: &lt;code class=&quot;highlighter-rouge&quot;&gt;/^&amp;lt;!--.*enable javascript.*--&amp;gt;/&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;CSS : &lt;code class=&quot;highlighter-rouge&quot;&gt;/^\/\*.*enable javascript.*\*\//&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;JS  : &lt;code class=&quot;highlighter-rouge&quot;&gt;/^\/\/.*enable javascript.*|^\/\*.*enable javascript.*\*\//&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;codeElementDepth&lt;/code&gt;: How much lower in the DOM tree the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;code&amp;gt;&lt;/code&gt; elements are
+than the level you want demo HTML &lt;code class=&quot;highlighter-rouge&quot;&gt;div.live-demo&lt;/code&gt;s to be inserted. Default
+is &lt;code class=&quot;highlighter-rouge&quot;&gt;2&lt;/code&gt; as explained in the “HTML” section of this document.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;insertPosition&lt;/code&gt;: The position to insert &lt;code class=&quot;highlighter-rouge&quot;&gt;div.live-demo&lt;/code&gt;s relative to the
+element that is &lt;code class=&quot;highlighter-rouge&quot;&gt;codeElementDepth&lt;/code&gt; levels up from the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;code&amp;gt;&lt;/code&gt; element. The
+default value is &lt;code class=&quot;highlighter-rouge&quot;&gt;'afterend'&lt;/code&gt;. See &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/Element.insertAdjacentHTML#Visualization_of_position_names&quot; title=&quot;Visualization of position names&quot;&gt;Element.insertAdjacentHTML&lt;/a&gt;
+for other values.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;license&quot;&gt;License&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;http://taye.mit-license.org/&quot; title=&quot;copy of the MIT license&quot;&gt;MIT&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><category term="javascript" /><category term="demos" /><summary type="html">takes the text out of highlighted snippets and adds elements and CSS to the DOM and executes JS code.</summary></entry><entry><title type="html">A guide to SVG elements</title><link href="http://taye.me/blog/svg/a-guide-to-svg-use-elements" rel="alternate" type="text/html" title="A guide to SVG &lt;use&gt; elements" /><published>2014-01-04T09:55:40+00:00</published><updated>2014-01-04T09:55:40+00:00</updated><id>http://taye.me/blog/svg/a-guide-to-svg-use-elements</id><content type="html" xml:base="http://taye.me/blog/svg/a-guide-to-svg-use-elements">&lt;style&gt;
+svg {
+    width: 100%;
+    height: 25%;
+    background-color: rgba(34, 153, 238, 0.2);
+}
+svg use {
+    pointer-events: none;
+}
+&lt;/style&gt;
+
+&lt;p&gt;SVG &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/SVG/Element/use&quot; title=&quot;use - SVG | MDN&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt;&lt;/a&gt; elements allow you to duplicate and re-use graphical SVG elements
+including &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;g&amp;gt;&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;svg&amp;gt;&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;symbol&amp;gt;&lt;/code&gt; elements as well as other &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt;
+elements.  With them, you can craft SVG documents with a
+&lt;a href=&quot;http://en.wikipedia.org/wiki/Don't_repeat_yourself&quot; title=&quot;Don't Repeat Yourself&quot;&gt;DRY&lt;/a&gt; kind of approach.&lt;/p&gt;
+
+&lt;p&gt;Below is an example of simple SVG in an HTML document. When written inline in
+HTML5, there is no need to specify the svg namespace
+&lt;code class=&quot;highlighter-rouge&quot;&gt;xmlns=&quot;http://www.w3.org/2000/svg&quot;&lt;/code&gt; or xlink namespace
+&lt;code class=&quot;highlighter-rouge&quot;&gt;xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot;&lt;/code&gt; attributes.&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- enable javascript to view a demo --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;svg&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;viewBox=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0 0 400 100&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;rect&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;x=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;100&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;y=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;20&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#29e&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;rect&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;x=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;250&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;y=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;30&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#29e&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/svg&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Apart from the x/y attributes the two &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;rect&amp;gt;&lt;/code&gt;s are identical. So instead of
+repeating code, we can write out only one of the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;rect&amp;gt;&lt;/code&gt;s and duplicate it
+with a &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt; element which has a different position.&lt;/p&gt;
+
+&lt;p&gt;To do this, we must:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;give the first &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;rect&amp;gt;&lt;/code&gt; an ID then we&lt;/li&gt;
+  &lt;li&gt;replace the second with a &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt; and&lt;/li&gt;
+  &lt;li&gt;give it an &lt;code class=&quot;highlighter-rouge&quot;&gt;xlink:href&lt;/code&gt; attribute with a value of &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;#[reference element
+ID]&quot;&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The result is two identical elements in the exact same position. To change the
+position of a &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt; element, we can use the &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt; attributes or the
+&lt;code class=&quot;highlighter-rouge&quot;&gt;transform&lt;/code&gt; attribute.&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- enable javascript to view a demo --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;svg&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;viewBox=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0 0 400 100&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;rect&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;original-rect&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;x=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;100&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;y=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;20&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#29e&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#original-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;x=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;150&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;y=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;10&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;c&quot;&gt;&amp;lt;!-- x/y of the &amp;lt;use&amp;gt; element
+             are added to x/y of the referenced &amp;lt;rect&amp;gt; --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/svg&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;The resulting image is identical to that of the previous example, but requires less
+code.&lt;/p&gt;
+
+&lt;h2 id=&quot;improvements&quot;&gt;Improvements&lt;/h2&gt;
+&lt;p&gt;The reference would be much more convenient to use if it’s center were always
+at the coordinates of it’s duplicates so that if you wanted a rectange centered
+at &lt;code class=&quot;highlighter-rouge&quot;&gt;(200, 50)&lt;/code&gt; you would simply write:&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#original-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;x=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;200&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;y=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- or --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#original-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(200 50)&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- using `transform` to position the element
+     makes combining animations a lot easier --&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We can do this by moving the reference element into a &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;defs&amp;gt;&lt;/code&gt; element and
+positioning it so that it center is at &lt;code class=&quot;highlighter-rouge&quot;&gt;(0, 0)&lt;/code&gt;. All elements in &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;defs&amp;gt;&lt;/code&gt;
+elements are not rendered unless they are referenced by another visible
+element.&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- enable javascript to view a demo --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;svg&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;viewBox=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0 0 400 100&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;c&quot;&gt;&amp;lt;!-- list resourses in a &amp;lt;defs&amp;gt; element --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;defs&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;rect&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;def-rect&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;x=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;-25&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;y=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;-25&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#29e&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/defs&amp;gt;&lt;/span&gt;
+
+    &lt;span class=&quot;c&quot;&gt;&amp;lt;!-- reference resourses by ID in xlink:href attribute --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#def-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(100 50)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#def-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(200 50)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#def-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(300 50)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/svg&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;property-inheritance&quot;&gt;Property Inheritance&lt;/h2&gt;
+&lt;p&gt;If a property like &lt;code class=&quot;highlighter-rouge&quot;&gt;fill&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;stroke&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;stroke-width&lt;/code&gt;, etc. isn’t specidied in
+the original element, then it can be inherited from the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt; element as if
+it were a &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;g&amp;gt;&lt;/code&gt;. For example, we can’t change the fill color of elements using
+&lt;code class=&quot;highlighter-rouge&quot;&gt;#def-rect&lt;/code&gt; by setting &lt;code class=&quot;highlighter-rouge&quot;&gt;fill&lt;/code&gt; of the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt; element (since the attribute is
+already set in the reference element) but we can set the stroke style since
+that wasn’t set in &lt;code class=&quot;highlighter-rouge&quot;&gt;#def-rect&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- enable javascript to view a demo --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;svg&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;viewBox=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0 0 400 100&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#def-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(100 50)&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;red&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;stroke=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;black&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#def-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(200 50)&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;red&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;stroke=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;black&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;stroke-width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;8&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#def-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(300 50)&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;red&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;stroke=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;black&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;stroke-width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;8&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;stroke-linejoin=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;round&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/svg&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;animations&quot;&gt;Animations&lt;/h2&gt;
+&lt;p&gt;Animations that are applied to the reference element are also observed in the
+duplicates. (Note that SMIL animations are not supported by Internet Explorer.)&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- enable javascript to view a demo --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;svg&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;viewBox=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0 0 400 100&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;defs&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;rect&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;anim-rect&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;x=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;-25&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;y=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;-25&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;50&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;fill=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#29e&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+            
+            &lt;span class=&quot;nt&quot;&gt;&amp;lt;animate&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;attributeName=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;fill&quot;&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;values=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#29e; #4e4; #f40; #29e&quot;&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;dur=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;6s&quot;&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;repeatCount=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;indefinite&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;/rect&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;/defs&amp;gt;&lt;/span&gt;
+
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#anim-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(100 50)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#anim-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(200 50)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#anim-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(300 50)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/svg&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Animations can also be added to each &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt; element.&lt;/p&gt;
+
+&lt;div class=&quot;language-xml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- enable javascript to view a demo --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;svg&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;viewBox=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0 0 400 100&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#anim-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(100 50)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;animateTransform&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;attributeName=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;transform&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;rotate&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;values=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0 0 0; 360 0 0&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;additive=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;sum&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;dur=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;6s&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;repeatCount=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;indefinite&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;&amp;lt;/use&amp;gt;&lt;/span&gt;
+
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#anim-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(200 50)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;animateTransform&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;attributeName=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;transform&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;scale&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;values=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;0.5; 1.5; 0.5&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;additive=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;sum&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;dur=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;3s&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;repeatCount=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;indefinite&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;&amp;lt;/use&amp;gt;&lt;/span&gt;
+
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;use&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xlink:href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#anim-rect&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;transform=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate(300 50)&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;nt&quot;&gt;&amp;lt;animateTransform&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;attributeName=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;transform&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;type=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;translate&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;values=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;-12.5 -12.5;
+                     12.5 -12.5;
+                     12.5  12.5;
+                    -12.5  12.5;
+                    -12.5 -12.5&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;additive=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;sum&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;dur=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;3s&quot;&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;repeatCount=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;indefinite&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;&amp;lt;/use&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/svg&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;dynamic-use-with-javscript&quot;&gt;Dynamic &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt; with javscript&lt;/h2&gt;
+
+&lt;p&gt;To create a &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;use&amp;gt;&lt;/code&gt; element with javascript, as with any SVGElement, we use
+&lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/document.createElementNS&quot; title=&quot;document.createElementNS - Web API Interfaces | MDN&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;document.createElementNS&lt;/code&gt;&lt;/a&gt; which takes an xml
+namespace URI and element nodeName strings.&lt;/p&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;useElement&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createElementNS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'http://www.w3.org/2000/svg'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'use'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;querySelector&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'svg'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;appendChild&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;useElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To set the &lt;code class=&quot;highlighter-rouge&quot;&gt;xlink:href&lt;/code&gt; attribute, we use &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/Element.setAttributeNS&quot; title=&quot;Element.setAttributeNS - Web API Interfaces | MDN&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Element.setAttributeNS&lt;/code&gt;&lt;/a&gt; which takes
+the namespace, the attribute name and the attribute value. In this
+case, the namespace is &lt;code class=&quot;highlighter-rouge&quot;&gt;xlink&lt;/code&gt; the URI of which is
+&lt;code class=&quot;highlighter-rouge&quot;&gt;http://www.w3.org/1999/xlink&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nx&quot;&gt;useElement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setAttributeNS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+        &lt;span class=&quot;s1&quot;&gt;'http://www.w3.org/1999/xlink'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// xlink NS URI&lt;/span&gt;
+        &lt;span class=&quot;s1&quot;&gt;'href'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;                         &lt;span class=&quot;c1&quot;&gt;// attribute (no 'xlink:')&lt;/span&gt;
+        &lt;span class=&quot;s1&quot;&gt;'#anim-rect'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;                  &lt;span class=&quot;c1&quot;&gt;// value to set&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="svg" /><category term="use" /><category term="use element" /><category term="xlink" /><category term="xlink:href" /><category term="namespaces" /><category term="javascript" /><category term="graphics" /><summary type="html">SVG elements allow you to duplicate and re-use graphical SVG elements including , and elements as well as other elements. With them, you can craft SVG documents with a DRY kind of approach.</summary></entry><entry><title type="html">How to control what is copy-pasted to/from the clipboard in Chrome, Firefox and Safari</title><link href="http://taye.me/blog/user-interaction/2013/12/02/browser-clipboard-copy-paste.html" rel="alternate" type="text/html" title="How to control what is copy-pasted to/from the clipboard in Chrome, Firefox and Safari" /><published>2013-12-02T01:09:57+00:00</published><updated>2013-12-02T01:09:57+00:00</updated><id>http://taye.me/blog/user-interaction/2013/12/02/browser-clipboard-copy-paste</id><content type="html" xml:base="http://taye.me/blog/user-interaction/2013/12/02/browser-clipboard-copy-paste.html">&lt;style type=&quot;text/css&quot;&gt;
+#rc-target {
+    z-index : 9003;
+    width   : 100px;
+    height  : 100px;
+    margin  : -50px;  /* so it's positioned at its centre */
+    opacity : 0.6;
+    border  : none;
+    padding : 0;
+
+    position: absolute;
+    left    : -1000px;
+    right   : -1000px;
+}
+
+#demo-space {
+    width: 90%;
+    padding: 5%;
+    background-color: #2299ee;
+
+    font-family: sans-serif;
+    font-size: 40px;
+    line-height: 1.4;
+    color: white;
+}
+&lt;/style&gt;
+
+&lt;p&gt;You can control what the browser copies and pastes when a user uses keyboard
+shortcuts or the right-click context menu by getting in between the default
+sequence of events and changing focus to an element of your choice so that by
+the time the user input sequence is complete, it will be targeting the element
+and content you choose.&lt;/p&gt;
+
+&lt;h2 id=&quot;handling-keyboard-shortcuts-ctrlc--ctrlv&quot;&gt;Handling keyboard shortcuts (Ctrl+C / Ctrl+V)&lt;/h2&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// 1. Add an event listener for `keydown` events&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'keydown'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 2. In this event listener, check if the [V] key is pressed while [Ctrl] is held&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;down&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;paste&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;shortcut&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keyCode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;86&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ctrlKey&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+        &lt;span class=&quot;c1&quot;&gt;// 3. If that is true, set focus to an input element so that a `paste`&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// event is fired.&lt;/span&gt;
+        &lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getElementByid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'paste-target'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;focus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 4. Otherwise check if [Ctrl] and [C] or [X] were pressed (copy or cut).&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keyCode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;67&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keyCode&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;88&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// 5. If true, set focus to an input element and select the containted text. It is&lt;/span&gt;
+   &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;that&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;will&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;be&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sent&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;clipboard&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;
+
+        &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;copyTarget&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getElementByid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'copy-target'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;copyTarget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;focus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;copyTarget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;handling-right-click-context-menu-cutcopypaste&quot;&gt;Handling right-click context menu cut/copy/paste&lt;/h2&gt;
+
+&lt;p&gt;Taking control of the context of the context menu is a little more tricky. The
+context-menu is shown at the end of a right-click and the context is of the
+element that the mouse was over. By placing an element below the mouse between
+the &lt;code class=&quot;highlighter-rouge&quot;&gt;mousedown&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;mouseup&lt;/code&gt; events, you can set the context to be that of any
+clickable element.&lt;/p&gt;
+
+&lt;p&gt;If this element is invisible then it does not interrupt the user’s workflow.&lt;/p&gt;
+
+&lt;p&gt;Style the right click target element so that it is invisible and placed
+off-screen.&lt;/p&gt;
+
+&lt;div class=&quot;language-css highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nf&quot;&gt;#rc-target&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;z-index&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;9003&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;width&lt;/span&gt;   &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;100px&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;height&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;100px&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;margin&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;-50px&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  &lt;span class=&quot;c&quot;&gt;/* so it's positioned at it's centre */&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;opacity&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;border&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;none&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;padding&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;nl&quot;&gt;position&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;absolute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;left&lt;/span&gt;    &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;-1000px&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;nl&quot;&gt;right&lt;/span&gt;   &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;-1000px&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Add a &lt;code class=&quot;highlighter-rouge&quot;&gt;mousedown&lt;/code&gt; event listener that checks for right-clicks&lt;/p&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'mousedown'&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;button&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// If the button is the right mouse button, move the input element to the&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// coordinates of the event&lt;/span&gt;
+        &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;rcTarget&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getElementByid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'rc-target'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;rcTarget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;style&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;left&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;pageX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;rcTarget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;style&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;top&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;pageY&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Then bring focus to the element and select the text inside it and prevent&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// the default event behaviour&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;rcTarget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;focus&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;rcTarget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;select&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;preventDefault&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// Hide the `#rc-target` element on `mousemove`&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'mousemove'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;event&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;rcTarget&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getElementById&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'rc-target'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+    &lt;span class=&quot;nx&quot;&gt;rcTarget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;style&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;left&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;rcTarget&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;style&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;top&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;After mouseup, the context menu will be displayed for the &lt;code class=&quot;highlighter-rouge&quot;&gt;#rc-target&lt;/code&gt; element.
+If the user clicks cut/copy/paste, it will relate to the text within the
+element.&lt;/p&gt;
+
+&lt;p&gt;This way, you can have the user copy and paste whatever data you choose from
+anywhere in your web page/app.&lt;/p&gt;
+
+&lt;div id=&quot;demo-space&quot; style=&quot;display: none&quot;&gt;
+    Try right-clicking here to see this working
+&lt;/div&gt;
+&lt;p&gt;&lt;input id=&quot;rc-target&quot; type=&quot;text&quot; /&gt;&lt;/p&gt;
+
+&lt;script&gt;
+// an input element which the paste/copy will target
+var rcTarget = document.getElementById('rc-target'),
+    demoSpace = document.getElementById('demo-space'),
+    index = 0;
+
+demoSpace.style.display = '';
+rcTarget.value = 'text inside textbox';
+
+demoSpace.onmousedown = function (event) {
+    // if it's a right-click
+    if (event.button === 2) {
+        // change the value of the input element
+        rcTarget.value = ['Apples', 'Mele', 'Pommes', 'Úlla'][(index++) % 4];
+        // focus and position the input element to be below the cursor
+        rcTarget.style.left = event.pageX + 'px';
+        rcTarget.style.top  = event.pageY + 'px';
+
+        rcTarget.focus();
+        rcTarget.select();
+
+        event.preventDefault();
+    }
+    // When the mouse goes up, the browser context menu is shown for the input element
+    // and the user can copy/paste the input element text using the browser UI
+}
+&lt;/script&gt;</content><author><name></name></author><category term="clipboard" /><category term="override" /><category term="copy" /><category term="paste" /><category term="javascript" /><summary type="html">control what the browser copies and pastes when a user uses keyboard shortcuts or the right-click context menu by changing focus to an element of your choice</summary></entry><entry><title type="html">Implementing elastic overscroll in JavaScript [Part 1]</title><link href="http://taye.me/blog/interact-js/2013/10/28/how-to-elastic-overscroll-1.html" rel="alternate" type="text/html" title="Implementing elastic overscroll in JavaScript [Part 1]" /><published>2013-10-28T02:10:30+00:00</published><updated>2013-10-28T02:10:30+00:00</updated><id>http://taye.me/blog/interact-js/2013/10/28/how-to-elastic-overscroll-1</id><content type="html" xml:base="http://taye.me/blog/interact-js/2013/10/28/how-to-elastic-overscroll-1.html">&lt;aside&gt;
+  &lt;p&gt;
+  &lt;strong&gt;
+    [Update 2019/04/20]: updated code to use newer interact.js APIs
+  &lt;/strong&gt;
+  &lt;/p&gt;
+&lt;/aside&gt;
+
+&lt;p&gt;When scrolling (or panning) normally, the distance the page is moved relative to the viewport is directly proportional to the dragged distance.&lt;/p&gt;
+
+&lt;p class=&quot;center-eq&quot;&gt;
+`f(x) = x`
+agraph plot( x ) endagraph
+&lt;/p&gt;
+
+&lt;p&gt;That is until the edge of the page meets an edge of the viewport. To report to the user that this has occured, the page continues to move but it &quot;resists&quot; the force that the user applies.&lt;/p&gt;
+
+&lt;p&gt;When I was thinking of what kind of function I could use to achieve this, I immediately thought &quot;&lt;a href=&quot;https://en.wikipedia.org/wiki/Exponential_decay&quot;&gt;exponential decay&lt;/a&gt;&quot;. A few equations later, I realised that I was wrong but close. Then I thought &quot;&lt;a href=&quot;https://en.wikipedia.org/wiki/Logarithm&quot;&gt;LOGARITHMS!&lt;/a&gt;&quot;&lt;/p&gt;
+
+&lt;p&gt;if `x` is the horizontal overscroll distance, then the resisted value fed back to the user would be&lt;/p&gt;
+
+&lt;p class=&quot;center-eq&quot;&gt;
+`ln(x)`
+agraph plot( ln(x) ) endgraph
+&lt;/p&gt;
+
+&lt;p&gt;... almost. The root of `ln(x)` is not `0` We need a function that meets `f(x) = x` at `(0, 0)` tangentially so that the page's movement is continuous and smooth.
+
+&lt;p class=&quot;center-eq&quot;&gt;
+`d/dx ln(x) = 1 / x`
+&lt;/p&gt;
+&lt;p class=&quot;center-eq&quot;&gt;
+`1 / x = 1 =&amp;gt; x = 1`
+&lt;/p&gt;
+
+&lt;p&gt;
+By adding the solution of `d/dx ln(x) = 1` to the parameter passed to `ln`, we effectively shift the curve to the left so that the slope of the curve is 1 at `x = 0`.
+&lt;/p&gt;
+
+&lt;p class=&quot;center-eq&quot;&gt;
+`ln(x + 1)`
+agraph
+plot( ln(x + 1) )
+plot( x )
+endagraph
+
+But still, the result of `ln(1 + x)` would make for too great a resistance. The obvious solution was to simply multiply by some scalar. That sort of works but the compound curve is no longer continuous.&lt;/p&gt;
+
+&lt;p class=&quot;center-eq&quot;&gt;
+`4 * ln(x + 1)`
+agraph
+xmin=-20; xmax=20;
+plot( 4 * ln(x + 1) );
+plot( f(x) )
+endgraph
+&lt;/p&gt;
+
+&lt;p&gt; The &quot;resisted&quot; overscroll would initially be ahead of the actual overscroll for a while before slowing down at the right-most point of intersection in the graph above. &lt;/p&gt;
+
+&lt;p&gt;To fix this, we shift the origin to the right so that at `x = 0`, `dy/dx = 1`.&lt;/p&gt;
+
+&lt;p class=&quot;center-eq&quot;&gt;`g(x) = a * ln(x)`&lt;/p&gt;
+&lt;p class=&quot;center-eq&quot;&gt;`g'(x) = a / x`&lt;/p&gt;
+&lt;p class=&quot;center-eq&quot;&gt;`a / x = 1 =&amp;gt; x = a`&lt;/p&gt;
+&lt;p class=&quot;center-eq&quot;&gt;`=&amp;gt; g(x + a)`&lt;/p&gt;
+&lt;p class=&quot;center-eq&quot;&gt;`=&amp;gt; a * ln(x + a)`&lt;/p&gt;
+
+&lt;br&gt;
+&lt;p class=&quot;center-eq&quot;&gt;
+`4 * ln(x + 4)`
+agraph
+xmin=-20; xmax=20;
+a = 4;
+plot( a * ln(x + a) );
+plot( x )
+endgraph
+&lt;/p&gt;
+
+&lt;p&gt; Almost there. What's left now is to move the curve downwards by `a * ln(a)`. &lt;/p&gt;
+&lt;p class=&quot;center-eq&quot;&gt;`h(x) = a * ln(x + a) - a * ln(a)`&lt;/p&gt;
+&lt;p class=&quot;center-eq&quot;&gt;`=&amp;gt; h(x) = a * (ln(x + a) - ln(a))`&lt;/p&gt;
+agraph
+xmin=-20; xmax=20;
+a = 4;
+plot( a * (ln(x + a) - ln(a)) );
+plot( x )
+endgraph
+
+&lt;div class=&quot;snap-example&quot;&gt;
+    &lt;h3&gt; Logarithmic resistance with interact.js path snapping &lt;/h3&gt;
+&lt;div class=&quot;canvas-group&quot;&gt;
+&lt;canvas id=&quot;elastic-path&quot;&gt; &lt;/canvas&gt;
+&lt;canvas id=&quot;elastic-drag&quot; class=&quot;overlay-canvas&quot;&gt; &lt;/canvas&gt;
+&lt;/div&gt;
+&lt;div class=&quot;snippet&quot;&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;interact&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;modifiers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;snap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;targets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;scale&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;scale&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;scale&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;75&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;na&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;Infinity&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script src=&quot;https://unpkg.com/interactjs@next/dist/interact.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/blog/js/ijs-demo.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+interact(document).on('DOMContentLoaded', setTimeout(function () {
+    var siteWidth = parseInt(window.getComputedStyle(document.querySelector('div.site')).width, 10);
+    window.demos = window.demos || [];
+
+    new demo.SnapDemo({
+        pathCanvas: '#elastic-path',
+        dragCanvas: '#elastic-drag',
+        width: siteWidth,
+        path: function (x, y) {
+            var scale = 50;
+
+            return {
+                x: scale * Math.log(x + scale) - scale * Math.log(scale),
+                y: 75,
+                range: Infinity
+            };
+        }
+    });
+    }, 1000));
+&lt;/script&gt;</content><author><name></name></author><category term="interact.js" /><category term="rubberband" /><category term="elastic" /><category term="math" /><category term="logarithms" /><category term="exponents" /><summary type="html">h(x) = a⋅ln(x + a) - a⋅ln(a)</summary></entry><entry><title type="html">Hey web-devs, stop listening for EITHER touch or mouse events!</title><link href="http://taye.me/blog/user-interaction/2013/10/02/stop-using-either-touch-or-mouse.html" rel="alternate" type="text/html" title="Hey web-devs, stop listening for EITHER touch or mouse events!" /><published>2013-10-02T19:56:10+01:00</published><updated>2013-10-02T19:56:10+01:00</updated><id>http://taye.me/blog/user-interaction/2013/10/02/stop-using-either-touch-or-mouse</id><content type="html" xml:base="http://taye.me/blog/user-interaction/2013/10/02/stop-using-either-touch-or-mouse.html">&lt;p&gt;Seriously. It’s annoying. Some devices have a touchscreen &lt;em&gt;and&lt;/em&gt; mouse/trackpad.
+When you do somehting like&lt;/p&gt;
+
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'createTouch'&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;document&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;element&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'touchstart'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;clickListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;element&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addEventListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'click'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;clickListener&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I start disliking you. It’s nothing personal, but you’ve just forced me to use the
+touchscreen of my laptop to interact with your website even if I prefer to use
+the trackpad or a connected mouse.&lt;/p&gt;
+
+&lt;p&gt;When I made the prototype for interact.js, I was guilty of doing
+&lt;a href=&quot;https://github.com/taye/interact.js/blob/8e6a7e8/interact.js#L15-25&quot;&gt;the same thing&lt;/a&gt;. However, I knew it was the wrong way to go about
+supporting touch events and I &lt;a href=&quot;https://github.com/taye/interact.js/commit/62efd5b&quot;&gt;eventually fixed&lt;/a&gt; it.&lt;/p&gt;</content><author><name></name></author><category term="rant" /><category term="touchscreen" /><category term="touch" /><category term="mouse" /><category term="javascript" /><category term="HTML5" /><category term="events" /><summary type="html">Seriously. It's annoying. Some devices have a touchscreen and mouse/trackpad.</summary></entry><entry><title type="html">Path snapping in interact.js</title><link href="http://taye.me/blog/interact-js/snap/2013/09/29/interactjs-path-snapping.html" rel="alternate" type="text/html" title="Path snapping in interact.js" /><published>2013-09-29T16:36:26+01:00</published><updated>2013-09-29T16:36:26+01:00</updated><id>http://taye.me/blog/interact-js/snap/2013/09/29/interactjs-path-snapping</id><content type="html" xml:base="http://taye.me/blog/interact-js/snap/2013/09/29/interactjs-path-snapping.html">&lt;aside&gt;
+  &lt;p&gt;
+  &lt;strong&gt;
+    [Update 2019/04/20]: updated code to use newer interact.js APIs
+  &lt;/strong&gt;
+  &lt;/p&gt;
+&lt;/aside&gt;
+
+&lt;a href=&quot;https://github.com/taye/interact.js&quot;&gt;interact.js&lt;/a&gt; just got even snappier. `path` snapping now lets you set fixed axis origin points or use functions to return the points that the pointer should snap to.
+
+&lt;div class=&quot;snap-example&quot;&gt;
+&lt;div class=&quot;canvas-group&quot;&gt;
+&lt;canvas id=&quot;line-path&quot;&gt; &lt;/canvas&gt;
+&lt;canvas id=&quot;line-drag&quot; class=&quot;overlay-canvas&quot;&gt; &lt;/canvas&gt;
+&lt;/div&gt;
+&lt;div class=&quot;snippet&quot;&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;interact&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;modifiers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;snap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;targets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;75&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;Infinity&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;snap-example&quot;&gt;
+&lt;div class=&quot;canvas-group&quot;&gt;
+&lt;canvas id=&quot;sin-path&quot; &gt; &lt;/canvas&gt;
+&lt;canvas id=&quot;sin-drag&quot; class=&quot;overlay-canvas&quot;&gt; &lt;/canvas&gt;
+&lt;/div&gt;
+&lt;div class=&quot;snippet&quot;&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;interact&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;modifiers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;snap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;targets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;75&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.04&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;Infinity&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;snap-example&quot;&gt;
+&lt;div class=&quot;canvas-group&quot;&gt;
+&lt;canvas id=&quot;square-path&quot; &gt; &lt;/canvas&gt;
+&lt;canvas id=&quot;square-drag&quot; class=&quot;overlay-canvas&quot;&gt; &lt;/canvas&gt;
+&lt;/div&gt;
+&lt;div class=&quot;snippet&quot;&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;interact&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;modifiers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;snap&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;targets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;Infinity&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script src=&quot;https://unpkg.com/interactjs@next/dist/interact.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/blog/js/ijs-demo.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+  var siteWidth = parseInt(window.getComputedStyle(document.querySelector('div.site')).width, 10);
+
+  window.demos = window.demos || [];
+
+  window.demos.push({
+    pathCanvas: '#sin-path',
+    dragCanvas: '#sin-drag',
+    width: siteWidth,
+    path: function (x, y) {
+      return {
+        y: (75 + 50 * Math.sin(x * 0.04)),
+        range: Infinity
+      };
+    }
+  });
+
+  window.demos.push({
+    pathCanvas: '#line-path',
+    dragCanvas: '#line-drag',
+    width: siteWidth,
+    path: {
+      y: 75,
+        range: Infinity
+    }
+  });
+
+  window.demos.push({
+    pathCanvas: '#square-path',
+    dragCanvas: '#square-drag',
+    width: siteWidth,
+    drawInterval: 2,
+    path: function (x, y) {
+      return {
+        y: x % 100 &lt; 50? 50: 100,
+        range: Infinity
+      };
+    }
+  });
+&lt;/script&gt;</content><author><name></name></author><category term="interact.js" /><category term="snap" /><category term="custom snap" /><category term="functional" /><category term="drag-and-drop" /><category term="drag and drop" /><category term="draggable" /><category term="droppable" /><summary type="html">path snapping now lets you set fixed axis origin points or use functions to return the points that the pointer should snap to.</summary></entry></feed>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>How to control what is copy-pasted to/from the clipboard in Chrome, Firefox and Safari | Taye Adeyemi</title>
+        <meta name="author" content="" />
+        <meta name="keywords" content="clipboard override copy paste javascript" />
+    
+        <meta name="description" content="control what the browser copies and pastes when a user uses keyboard shortcuts or the right-click context menu by changing focus to an element of your choice" />
+    
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+        <link rel="alternate" type="application/rss+xml" href="/blog/rss.xml"/>
+
+        <!-- syntax highlighting CSS -->
+        <link rel="stylesheet" href="/blog/css/syntax.css"/>
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="/blog/css/normalize.css"/>
+        <link rel="stylesheet" href="/blog/css/main.css"/>
+        <link rel="icon" href="/blog/img/hm-64.png"/>
+
+
+
+
+    </head>
+    <body>
+
+        <div class="site">
+          <header>
+              <h1 class="title"><a href="/blog">Here I am</a></h1>
+              <a class="extra" href="/blog">home</a>
+          </header>
+
+          <div class="post-title">
+    <h1> How to control what is copy-pasted to/from the clipboard in Chrome, Firefox and Safari </h1>
+    <p class="meta">
+        02 Dec 2013
+        <a href="https://twitter.com/share" class="twitter-share-button" data-via="TayeAdeyemi">Tweet</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    </p>
+</div>
+
+<article class="post">
+    <style type="text/css">
+#rc-target {
+    z-index : 9003;
+    width   : 100px;
+    height  : 100px;
+    margin  : -50px;  /* so it's positioned at its centre */
+    opacity : 0.6;
+    border  : none;
+    padding : 0;
+
+    position: absolute;
+    left    : -1000px;
+    right   : -1000px;
+}
+
+#demo-space {
+    width: 90%;
+    padding: 5%;
+    background-color: #2299ee;
+
+    font-family: sans-serif;
+    font-size: 40px;
+    line-height: 1.4;
+    color: white;
+}
+</style>
+
+<p>You can control what the browser copies and pastes when a user uses keyboard
+shortcuts or the right-click context menu by getting in between the default
+sequence of events and changing focus to an element of your choice so that by
+the time the user input sequence is complete, it will be targeting the element
+and content you choose.</p>
+
+<h2 id="handling-keyboard-shortcuts-ctrlc--ctrlv">Handling keyboard shortcuts (Ctrl+C / Ctrl+V)</h2>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 1. Add an event listener for `keydown` events</span>
+<span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'keydown'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// 2. In this event listener, check if the [V] key is pressed while [Ctrl] is held</span>
+    <span class="nx">down</span> <span class="p">(</span><span class="nx">the</span> <span class="nx">paste</span> <span class="nx">shortcut</span><span class="p">).</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">86</span> <span class="o">&amp;&amp;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">ctrlKey</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="c1">// 3. If that is true, set focus to an input element so that a `paste`</span>
+        <span class="c1">// event is fired.</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementByid</span><span class="p">(</span><span class="s1">'paste-target'</span><span class="p">).</span><span class="nx">focus</span><span class="p">();</span>
+        <span class="p">}</span>
+
+    <span class="c1">// 4. Otherwise check if [Ctrl] and [C] or [X] were pressed (copy or cut).</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">67</span> <span class="o">||</span> <span class="nx">event</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">88</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// 5. If true, set focus to an input element and select the containted text. It is</span>
+   <span class="k">this</span> <span class="nx">text</span> <span class="nx">that</span> <span class="nx">will</span> <span class="nx">be</span> <span class="nx">sent</span> <span class="nx">to</span> <span class="nx">the</span> <span class="nx">clipboard</span><span class="p">.</span>
+
+        <span class="kd">var</span> <span class="nx">copyTarget</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementByid</span><span class="p">(</span><span class="s1">'copy-target'</span><span class="p">);</span>
+
+        <span class="nx">copyTarget</span><span class="p">.</span><span class="nx">focus</span><span class="p">();</span>
+        <span class="nx">copyTarget</span><span class="p">.</span><span class="nx">select</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p><br /></p>
+
+<h2 id="handling-right-click-context-menu-cutcopypaste">Handling right-click context menu cut/copy/paste</h2>
+
+<p>Taking control of the context of the context menu is a little more tricky. The
+context-menu is shown at the end of a right-click and the context is of the
+element that the mouse was over. By placing an element below the mouse between
+the <code class="highlighter-rouge">mousedown</code> and <code class="highlighter-rouge">mouseup</code> events, you can set the context to be that of any
+clickable element.</p>
+
+<p>If this element is invisible then it does not interrupt the user’s workflow.</p>
+
+<p>Style the right click target element so that it is invisible and placed
+off-screen.</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">#rc-target</span> <span class="p">{</span>
+    <span class="nl">z-index</span> <span class="p">:</span> <span class="m">9003</span><span class="p">;</span>
+    <span class="nl">width</span>   <span class="p">:</span> <span class="m">100px</span><span class="p">;</span>
+    <span class="nl">height</span>  <span class="p">:</span> <span class="m">100px</span><span class="p">;</span>
+    <span class="nl">margin</span>  <span class="p">:</span> <span class="m">-50px</span><span class="p">;</span>  <span class="c">/* so it's positioned at it's centre */</span>
+    <span class="nl">opacity</span> <span class="p">:</span> <span class="m">0</span><span class="p">;</span>
+    <span class="nl">border</span>  <span class="p">:</span> <span class="nb">none</span><span class="p">;</span>
+    <span class="nl">padding</span> <span class="p">:</span> <span class="m">0</span><span class="p">;</span>
+
+    <span class="nl">position</span><span class="p">:</span> <span class="nb">absolute</span><span class="p">;</span>
+    <span class="nl">left</span>    <span class="p">:</span> <span class="m">-1000px</span><span class="p">;</span>
+    <span class="nl">right</span>   <span class="p">:</span> <span class="m">-1000px</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Add a <code class="highlighter-rouge">mousedown</code> event listener that checks for right-clicks</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'mousedown'</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">button</span> <span class="o">===</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+
+<span class="c1">// If the button is the right mouse button, move the input element to the</span>
+<span class="c1">// coordinates of the event</span>
+        <span class="kd">var</span> <span class="nx">rcTarget</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementByid</span><span class="p">(</span><span class="s1">'rc-target'</span><span class="p">);</span>
+
+        <span class="nx">rcTarget</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">pageX</span><span class="p">;</span>
+        <span class="nx">rcTarget</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span>  <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">pageY</span><span class="p">;</span>
+
+<span class="c1">// Then bring focus to the element and select the text inside it and prevent</span>
+<span class="c1">// the default event behaviour</span>
+
+        <span class="nx">rcTarget</span><span class="p">.</span><span class="nx">focus</span><span class="p">();</span>
+        <span class="nx">rcTarget</span><span class="p">.</span><span class="nx">select</span><span class="p">();</span>
+
+        <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+
+<span class="c1">// Hide the `#rc-target` element on `mousemove`</span>
+<span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">'mousemove'</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">rcTarget</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'rc-target'</span><span class="p">);</span>
+
+    <span class="nx">rcTarget</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">left</span> <span class="o">=</span> <span class="nx">rcTarget</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">top</span> <span class="o">=</span> <span class="s1">''</span><span class="p">;</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>After mouseup, the context menu will be displayed for the <code class="highlighter-rouge">#rc-target</code> element.
+If the user clicks cut/copy/paste, it will relate to the text within the
+element.</p>
+
+<p>This way, you can have the user copy and paste whatever data you choose from
+anywhere in your web page/app.</p>
+
+<div id="demo-space" style="display: none">
+    Try right-clicking here to see this working
+</div>
+<p><input id="rc-target" type="text" /></p>
+
+<script>
+// an input element which the paste/copy will target
+var rcTarget = document.getElementById('rc-target'),
+    demoSpace = document.getElementById('demo-space'),
+    index = 0;
+
+demoSpace.style.display = '';
+rcTarget.value = 'text inside textbox';
+
+demoSpace.onmousedown = function (event) {
+    // if it's a right-click
+    if (event.button === 2) {
+        // change the value of the input element
+        rcTarget.value = ['Apples', 'Mele', 'Pommes', 'Úlla'][(index++) % 4];
+        // focus and position the input element to be below the cursor
+        rcTarget.style.left = event.pageX + 'px';
+        rcTarget.style.top  = event.pageY + 'px';
+
+        rcTarget.focus();
+        rcTarget.select();
+
+        event.preventDefault();
+    }
+    // When the mouse goes up, the browser context menu is shown for the input element
+    // and the user can copy/paste the input element text using the browser UI
+}
+</script>
+
+
+</article>
+
+<hr>
+
+
+<div id="related-posts">
+    <h3> You might also like </h3>
+    <ul>
+    
+        <li><a href="/blog/tips/2015/11/16/mouse-drag-outside-iframe/">Receiving mousemove events outside dragged iframe</a></li>
+    
+        <li><a href="/blog/interact-js/2014/11/16/interactjs-article-on-mozhacks/">interact.js on Mozilla Hacks</a></li>
+    
+        <li><a href="/blog/interact.js/svg/2014/08/10/creating-animated-interact-js-logo/">Creating the animated interact.js logo in SVG and SMIL</a></li>
+    
+    </ul>
+</div>
+
+
+
+          <footer>
+            <img id="footer-me" src="/blog/img/hm-64.png" alt="A self portrait">
+            <div class="contact">
+              <p>
+                Taye - Programmer · Visionary · Delicious
+              </p>
+            </div>
+            <div class="contact">
+              <p>
+                <a href="https://github.com/taye">github.com/taye</a><br/>
+                <a class="email" href="mailto:&#x64;&#x65;&#x76;&#x40;&#x74;&#x61;&#x79;&#x65;&#x2e;&#x6d;&#x65;">
+                    &#x64;&#x65;&#x76;&#x40;&#x74;&#x61;&#x79;&#x65;&#x2e;&#x6d;&#x65;</a><br>
+                <a href="https://plus.google.com/?rel=author">+</a>
+              </p>
+            </div>
+            <a id="cc-license" title="Creative Commons Attribution-ShareAlike" rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US" target="_blank">
+                <img src="/blog/img/cc_cc.png" alt="Creative Commons">
+                <img src="/blog/img/cc_by.png" alt="Attribution">
+                <img src="/blog/img/cc_sa.png" alt="ShareAlike">
+            </a>
+          </footer>
+        </div>
+
+
+    </body>
+</html>
