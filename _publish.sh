@@ -30,7 +30,7 @@ pushd $gh_pages_dir &&
   git add -A . &&
   git commit -m "build from $git_rev" &&
   git remote add github $git_origin
-  git push $git_origin $output_branch:gh-pages &&
+  git push $git_origin $output_branch:$output_branch &&
   git push &&
   popd &&
   git push
